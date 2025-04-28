@@ -1,0 +1,32 @@
+#!/bin/bash
+set -e  # Exit immediately if a command fails
+
+SRCDIR="$1"
+DESTDIR="$2"
+
+# Copy binaries
+cp "$SRCDIR/2ship2harkinian/build-soh/mm/2s2h.elf" "$DESTDIR/"
+cp "$SRCDIR/2ship2harkinian/build-soh/mm/2ship.o2r" "$DESTDIR/"
+
+# Replace libs folder
+rm -rf "$DESTDIR/libs"
+cp -r "$SRCDIR/2ship2harkinian/build-soh/libs" "$DESTDIR/"
+
+# Define and recreate
+EXTRACTOR_DIR="$DESTDIR/assets/extractor"
+EXTRACTOR_ZIP="$DESTDIR/assets/extractor.zip"
+rm -rf "$EXTRACTOR_DIR"
+mkdir -p "$EXTRACTOR_DIR"
+
+# Copy ZAPD.out
+cp "$SRCDIR/2ship2harkinian/build-soh/ZAPD/ZAPD.out" "$EXTRACTOR_DIR/ZAPD.out"
+
+# Recreate extractor.zip
+cp -r "$SRCDIR/2ship2harkinian/build-soh/mm/assets/extractor" "$EXTRACTOR_DIR"
+
+(
+  cd "$DESTDIR/assets"
+  zip -r "extractor.zip" "extractor/*"
+)
+
+rm -rf "$EXTRACTOR_DIR"
