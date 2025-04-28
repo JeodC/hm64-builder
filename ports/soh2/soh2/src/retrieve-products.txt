@@ -22,11 +22,11 @@ mkdir -p "$EXTRACTOR_DIR"
 cp "$SRCDIR/2ship2harkinian/build-soh/ZAPD/ZAPD.out" "$EXTRACTOR_DIR/ZAPD.out"
 
 # Recreate extractor.zip
-cp -r "$SRCDIR/2ship2harkinian/build-soh/mm/assets/extractor" "$EXTRACTOR_DIR"
+cp -r "$SRCDIR/2ship2harkinian/build-soh/mm/assets/extractor/"* "$EXTRACTOR_DIR"
 
 (
   cd "$DESTDIR/assets"
-  zip -r "extractor.zip" "extractor/*"
+  zip -r extractor.zip extractor
 )
 
 rm -rf "$EXTRACTOR_DIR"
