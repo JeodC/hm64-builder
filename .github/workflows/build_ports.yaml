@@ -1,0 +1,36 @@
+name: Build Ports
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 20 * * *'
+
+jobs:
+  build-soh:
+    name: Build Ship of Harkinian
+    uses: ./.github/workflows/build_port.yaml
+    with:
+      port-name: "Ship of Harkinian"
+      short-name: SoH
+      port-dir: soh
+      build-type: release
+      upstream-repo: "HarbourMasters/Shipwright"
+
+  build-soh2:
+    name: Build Ship of Harkinian 2
+    uses: ./.github/workflows/build_port.yaml
+    with:
+      port-name: "Ship of Harkinian 2"
+      short-name: SoH2
+      port-dir: soh2
+      build-type: release
+      upstream-repo: "HarbourMasters/2ship2harkinian"
+      
+  build-starship:
+    name: Build Starship
+    uses: ./.github/workflows/build_port.yaml
+    with:
+      port-name: "Starship"
+      short-name: Starship
+      port-dir: starship
+      build-type: release
+      upstream-repo: "HarbourMasters/Starship"

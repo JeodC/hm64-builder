@@ -1,0 +1,123 @@
+name: Build port
+
+on:
+  workflow_call:
+    inputs:
+      port-name:
+        description: "Port name"
+        required: true
+        type: string
+      short-name:
+        description: "Short name"
+        required: true
+        type: string
+      port-dir:
+        description: "Portfolder"
+        required: true
+        type: string
+      build-type:
+        description: "Build type"
+        required: true
+        type: string
+      upstream-repo:
+        description: "Upstream repository"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            releases
+            tools
+            SOURCE_SETUP.txt
+            ports/${{ inputs.port-dir }}
+          sparse-checkout-cone-mode: false
+
+      - name: Fetch latest upstream release tag
+        id: upstream
+        run: |
+          response=$(curl -s https://api.github.com/repos/${{ inputs.upstream-repo }}/releases/latest)
+          upstream_tag=$(echo "$response" | jq -r .tag_name)
+          upstream_body=$(echo "$response" | jq -r .body)
+
+          # Handle null or missing tag
+          if [[ -z "$upstream_tag" || "$upstream_tag" == "null" ]]; then
+            echo "No upstream release found."
+            echo "UPSTREAM_TAG=" >> $GITHUB_ENV
+            echo "UPSTREAM_BODY=" >> $GITHUB_ENV
+          else
+            echo "UPSTREAM_TAG=$upstream_tag" >> $GITHUB_ENV
+            echo "UPSTREAM_BODY<<EOF" >> $GITHUB_ENV
+            echo "$upstream_body" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
+
+      - name: Fetch latest origin release tag
+        id: origin
+        run: |
+          origin_tag=$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases" \
+            | jq -r '.[] | select(.tag_name | startswith("${{ inputs.short-name }}-release-")) | .tag_name' \
+            | head -n1)
+
+          origin_version="${origin_tag#*-release-}"
+          echo "ORIGIN_VERSION=$origin_version" >> $GITHUB_ENV
+
+      - name: Normalize upstream and origin tags for version comparison
+        id: normalize
+        run: |
+          upstream_version="${UPSTREAM_TAG#v}"
+          origin_version="${ORIGIN_VERSION#v}"
+
+          echo "UPSTREAM_VERSION=${upstream_version}" >> $GITHUB_ENV
+          echo "ORIGIN_VERSION=${origin_version}" >> $GITHUB_ENV
+
+      - name: Compare versions and decide
+        id: compare
+        run: |
+          if [[ -z "$UPSTREAM_VERSION" ]]; then
+            echo "No upstream release version found, skipping build."
+            echo "build=false" >> $GITHUB_ENV
+          elif [[ -z "$ORIGIN_VERSION" || "$UPSTREAM_VERSION" != "$ORIGIN_VERSION" ]]; then
+            echo "Version mismatch or no origin release found. Proceeding with build..."
+            echo "build=true" >> $GITHUB_ENV
+          else
+            echo "Versions are the same. Skipping build."
+            echo "build=false" >> $GITHUB_ENV
+          fi
+
+      - name: Build port
+        if: env.build == 'true'
+        run: |
+          ./tools/build_port.sh ports/${{ inputs.port-dir }}/${{ inputs.port-dir }}
+
+      - name: Create zip file
+        if: env.build == 'true'
+        run: |
+          cd ports/${{ inputs.port-dir }}
+          rm -rf ${{ inputs.port-dir }}/*.part.[0-9]*
+          zip -r ${{ inputs.port-dir }}.zip *.sh ${{ inputs.port-dir }}
+          echo ${{ inputs.port-dir }}.zip >> .gitignore
+          echo ".gitignore" >> .gitignore
+
+      - name: Get current date
+        id: date
+        run: |
+          echo "name=$(date +'%Y-%m-%d')" > "$GITHUB_OUTPUT"
+   
+      - name: Create release
+        if: env.build == 'true'
+        uses: "ncipollo/release-action@v1.16.0"
+        with:
+          tag: "${{ inputs.short-name }}-${{ inputs.build-type }}-${{ env.UPSTREAM_VERSION }}"
+          body: "${{ env.UPSTREAM_BODY }}"
+          artifacts: ports/${{ inputs.port-dir }}/*.zip
+          makeLatest: true
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}

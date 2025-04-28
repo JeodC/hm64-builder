@@ -1,0 +1,70 @@
+#!/bin/bash
+set -e
+
+SRCDIR=$1
+DESTDIR=$2
+
+# Go to the destination folder
+cd "$DESTDIR" || { echo "DESTDIR not found: $DESTDIR"; exit 1; }
+
+# ----------------------
+# Copy the ELF
+# ----------------------
+if [ -f "$SRCDIR/Shipwright/build-soh/soh/soh.elf" ]; then
+    cp "$SRCDIR/Shipwright/build-soh/soh/soh.elf" .
+else
+    echo "Error: soh.elf not found"
+    exit 1
+fi
+
+# ----------------------
+# Copy the O2R file
+# ----------------------
+if [ -f "$SRCDIR/Shipwright/build-soh/soh/soh.o2r" ]; then
+    cp "$SRCDIR/Shipwright/build-soh/soh/soh.o2r" .
+else
+    echo "Warning: No OTR file found (soh.o2r)"
+fi
+
+# ----------------------
+# Replace libs folder
+# ----------------------
+rm -rf ./libs
+cp -r "$SRCDIR/Shipwright/build-soh/libs" .
+
+# ----------------------
+# Copy ZAPD tool
+# ----------------------
+if [ -f "$SRCDIR/Shipwright/build-soh/ZAPD/ZAPD.out" ]; then
+    mkdir -p ./assets/extractor
+    cp "$SRCDIR/Shipwright/build-soh/ZAPD/ZAPD.out" ./assets/extractor/ZAPD.out
+else
+    echo "Warning: ZAPD.out not found"
+fi
+
+# ----------------------
+# Copy and zip extractor
+# ----------------------
+cd ./assets
+
+EXTRACTOR_SRC="$SRCDIR/Shipwright/soh/assets/extractor"
+XML_SRC="$SRCDIR/Shipwright/soh/assets/xml"
+
+if [ -d "$EXTRACTOR_SRC" ] && [ -d "$XML_SRC" ]; then
+    # Copy contents to a temporary folder
+    mkdir tmp_zip
+    cp -r "$EXTRACTOR_SRC/"* tmp_zip/
+    cp -r "$XML_SRC" tmp_zip/
+
+    # Zip the contents
+    cd tmp_zip || exit 1
+    zip -r ../extractor.zip ./*
+    cd ..
+
+    # Cleanup
+    rm -rf tmp_zip
+else
+    echo "Warning: extractor or xml directory not found, skipping zip."
+fi
+
+echo "Packaging complete. You will also need to update otrgen by hand."
