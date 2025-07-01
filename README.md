@@ -3,6 +3,6 @@ This is a simple repository to automatically obtain new release tags (once per d
 
 - Ship of Harkinian (used with [PortMaster's Ship of Harkinian port](https://github.com/JeodC/PortMaster-Games/tree/main/ports/released/shipofharkinian))
 - 2 Ship 2 Harkinian (used with [PortMaster's 2Ship2Harkinian port](https://github.com/JeodC/PortMaster-Games/tree/main/ports/released/shipofharkinian2))
-- Starship (used with [PortMaster's Starship port](https://github.com/JeodC/PortMaster-Games/tree/main/ports/unreleased/starship))
+- Starship (used with [PortMaster's Starship port](https://github.com/JeodC/PortMaster-Games/tree/main/ports/released/starship))
 
 Releases from *this* repository use the same descriptions as the upstream releases.
