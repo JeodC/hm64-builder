@@ -6,3 +6,5 @@ This is a simple repository to automatically obtain new release tags (once per d
 - Starship (used with [my Starship port](https://github.com/JeodC/PortMaster-Games/tree/main/ports/released/starship))
 
 Releases from *this* repository use the same descriptions as the upstream releases.
+
+Thanks to beniamino for the actions build which inspired this repository.
