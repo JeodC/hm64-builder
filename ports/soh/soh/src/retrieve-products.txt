@@ -1,22 +1,61 @@
 #!/bin/bash
+set -e
 
 SRCDIR=$1
 DESTDIR=$2
 
-cd $DESTDIR
+# Go to the destination folder
+cd "$DESTDIR" || { echo "DESTDIR not found: $DESTDIR"; exit 1; }
 
-cp $SRCDIR/Shipwright/build-soh/soh/soh.elf .
-cp $SRCDIR/Shipwright/build-soh/soh/soh.otr .
+# ----------------------
+# Copy the ELF
+# ----------------------
+if [ -f "$SRCDIR/Shipwright/build-soh/soh/soh.elf" ]; then
+    cp "$SRCDIR/Shipwright/build-soh/soh/soh.elf" .
+else
+    echo "Error: soh.elf not found"
+    exit 1
+fi
 
-rm -r ./libs
-cp -r $SRCDIR/Shipwright/build-soh/libs .
+# ----------------------
+# Copy the OTR file
+# ----------------------
+if [ -f "$SRCDIR/Shipwright/build-soh/soh/soh.otr" ]; then
+    cp "$SRCDIR/Shipwright/build-soh/soh/soh.otr" .
+elif [ -f "$SRCDIR/Shipwright/build-soh/soh/soh.o2r" ]; then
+    cp "$SRCDIR/Shipwright/build-soh/soh/soh.o2r" .
+else
+    echo "Warning: No OTR file found (soh.otr or soh.o2r)"
+fi
 
-cp $SRCDIR/Shipwright/build-soh/ZAPD/ZAPD.out ./assets/ZAPD.out
+# ----------------------
+# Replace libs folder
+# ----------------------
+rm -rf ./libs
+cp -r "$SRCDIR/Shipwright/build-soh/libs" .
 
-cd ./assets
+# ----------------------
+# Copy ZAPD tool
+# ----------------------
+if [ -f "$SRCDIR/Shipwright/build-soh/ZAPD/ZAPD.out" ]; then
+    cp "$SRCDIR/Shipwright/build-soh/ZAPD/ZAPD.out" ./assets/ZAPD.out
+else
+    echo "Warning: ZAPD.out not found"
+fi
+
+# ----------------------
+# Copy and zip extractor
+# ----------------------
+cd ./assets || exit 1
 rm -rf ./extractor
-cp -r $SRCDIR/Shipwright/build-soh/soh/assets/extractor .
-zip -r extractor.zip ./extractor
-rm -rf ./extractor
 
-echo You will also need to update otrgen by hand
+EXTRACTOR_SRC="$SRCDIR/Shipwright/soh/assets/extractor"
+if [ -d "$EXTRACTOR_SRC" ]; then
+    cp -r "$EXTRACTOR_SRC" .
+    zip -r extractor.zip ./extractor
+    rm -rf ./extractor
+else
+    echo "Warning: extractor directory not found, skipping zip."
+fi
+
+echo "Packaging complete. You will also need to update otrgen by hand."
