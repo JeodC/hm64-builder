@@ -36,7 +36,7 @@ cp -r "$SRCDIR/Shipwright/build-soh/libs" .
 # Copy ZAPD tool
 # ----------------------
 if [ -f "$SRCDIR/Shipwright/build-soh/ZAPD/ZAPD.out" ]; then
-    cp "$SRCDIR/Shipwright/build-soh/ZAPD/ZAPD.out" ./assets/ZAPD.out
+    cp "$SRCDIR/Shipwright/build-soh/ZAPD/ZAPD.out" ./assets/extractor/ZAPD.out
 else
     echo "Warning: ZAPD.out not found"
 fi
@@ -44,16 +44,26 @@ fi
 # ----------------------
 # Copy and zip extractor
 # ----------------------
-cd ./assets || exit 1
-rm -rf ./extractor
+cd ./assets
 
 EXTRACTOR_SRC="$SRCDIR/Shipwright/soh/assets/extractor"
-if [ -d "$EXTRACTOR_SRC" ]; then
-    cp -r "$EXTRACTOR_SRC" .
-    zip -r extractor.zip ./extractor
-    rm -rf ./extractor
+XML_SRC="$SRCDIR/Shipwright/soh/assets/xml"
+
+if [ -d "$EXTRACTOR_SRC" ] && [ -d "$XML_SRC" ]; then
+    # Copy contents to a temporary folder
+    mkdir tmp_zip
+    cp -r "$EXTRACTOR_SRC/"* tmp_zip/
+    cp -r "$XML_SRC/"* tmp_zip/
+
+    # Zip the contents
+    cd tmp_zip || exit 1
+    zip -r ../extractor.zip ./*
+    cd ..
+
+    # Cleanup
+    rm -rf tmp_zip
 else
-    echo "Warning: extractor directory not found, skipping zip."
+    echo "Warning: extractor or xml directory not found, skipping zip."
 fi
 
 echo "Packaging complete. You will also need to update otrgen by hand."
