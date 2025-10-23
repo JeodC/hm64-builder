@@ -18,14 +18,12 @@ else
 fi
 
 # ----------------------
-# Copy the OTR file
+# Copy the O2R file
 # ----------------------
-if [ -f "$SRCDIR/Shipwright/build-soh/soh/soh.otr" ]; then
-    cp "$SRCDIR/Shipwright/build-soh/soh/soh.otr" .
-elif [ -f "$SRCDIR/Shipwright/build-soh/soh/soh.o2r" ]; then
+if [ -f "$SRCDIR/Shipwright/build-soh/soh/soh.o2r" ]; then
     cp "$SRCDIR/Shipwright/build-soh/soh/soh.o2r" .
 else
-    echo "Warning: No OTR file found (soh.otr or soh.o2r)"
+    echo "Warning: No OTR file found (soh.o2r)"
 fi
 
 # ----------------------
