@@ -54,7 +54,7 @@ if [ -d "$EXTRACTOR_SRC" ] && [ -d "$XML_SRC" ]; then
     # Copy contents to a temporary folder
     mkdir tmp_zip
     cp -r "$EXTRACTOR_SRC/"* tmp_zip/
-    cp -r "$XML_SRC/"* tmp_zip/
+    cp -r "$XML_SRC" tmp_zip/
 
     # Zip the contents
     cd tmp_zip || exit 1
