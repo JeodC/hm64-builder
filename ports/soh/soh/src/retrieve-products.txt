@@ -36,6 +36,7 @@ cp -r "$SRCDIR/Shipwright/build-soh/libs" .
 # Copy ZAPD tool
 # ----------------------
 if [ -f "$SRCDIR/Shipwright/build-soh/ZAPD/ZAPD.out" ]; then
+    mkdir -p ./assets/extractor
     cp "$SRCDIR/Shipwright/build-soh/ZAPD/ZAPD.out" ./assets/extractor/ZAPD.out
 else
     echo "Warning: ZAPD.out not found"
