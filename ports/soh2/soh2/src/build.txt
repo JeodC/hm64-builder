@@ -60,11 +60,11 @@ cd ../..
 git clone https://github.com/xiph/opusfile.git
 cd opusfile
 git checkout v0.12
-mkdir build-soh && cd build-soh
-cmake .. -DBUILD_SHARED_LIBS=ON
+./autogen.sh
+./configure --prefix=/usr/local --enable-shared
 make -j8
 make install
-cd ../..
+cd ..
 
 #### 2S2H ####
 
