@@ -5,7 +5,9 @@ SRCDIR="$1"
 DESTDIR="$2"
 
 # Copy binaries
-cp "$SRCDIR/2ship2harkinian/build-soh/mm/2s2h.elf" "$DESTDIR/"
+for elf_file in "$SRCDIR/2ship2harkinian/build-soh/mm/"*.elf; do
+    cp "$elf_file" "$DESTDIR/"
+done
 cp "$SRCDIR/2ship2harkinian/build-soh/mm/2ship.o2r" "$DESTDIR/"
 
 # Replace libs folder
