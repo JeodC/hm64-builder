@@ -43,40 +43,48 @@ jobs:
       - name: Fetch latest upstream release tag
         id: upstream
         run: |
-          upstream_tag=$(curl -s https://api.github.com/repos/${{ inputs.upstream-repo }}/releases/latest | jq -r .tag_name)
-          upstream_body=$(curl -s https://api.github.com/repos/${{ inputs.upstream-repo }}/releases/latest | jq -r .body)
-          echo "UPSTREAM_TAG=$upstream_tag" >> $GITHUB_ENV
-          echo "UPSTREAM_BODY<<EOF" >> $GITHUB_ENV
-          echo "$upstream_body" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          response=$(curl -s https://api.github.com/repos/${{ inputs.upstream-repo }}/releases/latest)
+          upstream_tag=$(echo "$response" | jq -r .tag_name)
+          upstream_body=$(echo "$response" | jq -r .body)
+
+          # Handle null or missing tag
+          if [[ -z "$upstream_tag" || "$upstream_tag" == "null" ]]; then
+            echo "No upstream release found."
+            echo "UPSTREAM_TAG=" >> $GITHUB_ENV
+            echo "UPSTREAM_BODY=" >> $GITHUB_ENV
+          else
+            echo "UPSTREAM_TAG=$upstream_tag" >> $GITHUB_ENV
+            echo "UPSTREAM_BODY<<EOF" >> $GITHUB_ENV
+            echo "$upstream_body" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
 
       - name: Fetch latest origin release tag
         id: origin
         run: |
-          origin_tag=$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases" | jq -r '.[] | select(.tag_name | startswith("${{ inputs.short-name }}-release-")) | .tag_name' | head -n1)
+          origin_tag=$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases" \
+            | jq -r '.[] | select(.tag_name | startswith("${{ inputs.short-name }}-release-")) | .tag_name' \
+            | head -n1)
+
           origin_version="${origin_tag#*-release-}"
           echo "ORIGIN_VERSION=$origin_version" >> $GITHUB_ENV
 
       - name: Normalize upstream and origin tags for version comparison
         id: normalize
         run: |
-          # Extract the version part from both the upstream and origin tags
-          upstream_version="${UPSTREAM_TAG}"
-          origin_version="${ORIGIN_VERSION}"
+          upstream_version="${UPSTREAM_TAG#v}"
+          origin_version="${ORIGIN_VERSION#v}"
 
-          # Remove any leading 'v' from the version tag if it exists
-          upstream_version="${upstream_version#v}"
-          origin_version="${origin_version#v}"
-
-          # Store normalized versions
           echo "UPSTREAM_VERSION=${upstream_version}" >> $GITHUB_ENV
           echo "ORIGIN_VERSION=${origin_version}" >> $GITHUB_ENV
 
       - name: Compare versions and decide
         id: compare
         run: |
-          # If origin tag is empty (no release), proceed with the build
-          if [[ -z "${ORIGIN_VERSION}" || "${UPSTREAM_VERSION}" != "${ORIGIN_VERSION}" ]]; then
+          if [[ -z "$UPSTREAM_VERSION" ]]; then
+            echo "No upstream release version found, skipping build."
+            echo "build=false" >> $GITHUB_ENV
+          elif [[ -z "$ORIGIN_VERSION" || "$UPSTREAM_VERSION" != "$ORIGIN_VERSION" ]]; then
             echo "Version mismatch or no origin release found. Proceeding with build..."
             echo "build=true" >> $GITHUB_ENV
           else
@@ -95,7 +103,6 @@ jobs:
           cd ports/${{ inputs.port-dir }}
           rm -rf ${{ inputs.port-dir }}/*.part.[0-9]*
           zip -r ${{ inputs.port-dir }}.zip *.sh ${{ inputs.port-dir }}
-          # Don't add this to repo
           echo ${{ inputs.port-dir }}.zip >> .gitignore
           echo ".gitignore" >> .gitignore
 
