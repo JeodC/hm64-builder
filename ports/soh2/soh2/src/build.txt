@@ -48,24 +48,6 @@ cd ..
 mv cmake/tinyxml2-config.cmake cmake/tinyxml2-config.cmake.disabled
 cd ..
 
-git clone https://github.com/xiph/opus.git
-cd opus
-git checkout v1.5.2
-mkdir build-soh && cd build-soh
-cmake .. -DBUILD_SHARED_LIBS=ON
-make -j8
-make install
-cd ../..
-
-git clone https://github.com/xiph/opusfile.git
-cd opusfile
-git checkout v0.12
-./autogen.sh
-./configure --prefix=/usr/local --enable-shared
-make -j8
-make install
-cd ..
-
 #### 2S2H ####
 
 git clone https://github.com/HarbourMasters/2ship2harkinian.git
