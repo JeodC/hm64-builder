@@ -66,11 +66,12 @@ cd ..
 
 mkdir build-soh && cd build-soh
 
-CC=clang-18 CXX=clang++-18 cmake .. -GNinja -DUSE_OPENGLES=1 \
- -DBUILD_CROWD_CONTROL=0 -DCMAKE_BUILD_TYPE=Release
-
-export CFLAGS="-Wno-macro-redefined -Wno-unknown-warning-option"
-export CXXFLAGS="-Wno-macro-redefined -Wno-unknown-warning-option"
+CC=clang-18 CXX=clang++-18 cmake .. -GNinja \
+CFLAGS="-Wno-macro-redefined -Wno-unknown-warning-option" \
+CXXFLAGS="-Wno-macro-redefined -Wno-unknown-warning-option" \
+-DUSE_OPENGLES=1 \
+-DBUILD_CROWD_CONTROL=0 \
+-DCMAKE_BUILD_TYPE=Release
 
 cmake --build . -j8
 
