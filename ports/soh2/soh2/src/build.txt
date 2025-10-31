@@ -68,6 +68,10 @@ mkdir build-soh && cd build-soh
 
 CC=clang-18 CXX=clang++-18 cmake .. -GNinja -DUSE_OPENGLES=1 \
  -DBUILD_CROWD_CONTROL=0 -DCMAKE_BUILD_TYPE=Release
+
+export CFLAGS="-Wno-macro-redefined -Wno-unknown-warning-option"
+export CXXFLAGS="-Wno-macro-redefined -Wno-unknown-warning-option"
+
 cmake --build . -j8
 
 cmake --build . --target Generate2ShipOtr -j8
