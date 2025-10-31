@@ -85,5 +85,3 @@ cp /usr/lib/aarch64-linux-gnu/libspdlog.so.1 libs/
 cp /usr/local/lib/libbz2.so.[0-9]* libs/
 cp /usr/local/lib/libzip.so.[0-9]* libs/
 cp /usr/local/lib/libtinyxml2.so.[0-9]* libs/
-cp /usr/local/lib/libopus.so.[0-9]* libs/
-cp /usr/local/lib/libopusfile.so.[0-9]* libs/
