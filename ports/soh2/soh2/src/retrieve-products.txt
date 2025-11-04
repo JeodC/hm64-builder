@@ -25,7 +25,7 @@ cp "$SRCDIR/2ship2harkinian/build-soh/ZAPD/ZAPD.out" "$EXTRACTOR_DIR/ZAPD.out"
 
 # Recreate extractor.zip
 cp -r "$SRCDIR/2ship2harkinian/mm/assets/extractor/"* "$EXTRACTOR_DIR"
-cp -r "$SRCDIR/2ship2harkinian/mm/assets/xml" "$EXTRACTOR_DIR"
+cp -r "$SRCDIR/2ship2harkinian/mm/assets/xml" "$DESTDIR/assets/"
 
 (
   cd "$DESTDIR/assets"
