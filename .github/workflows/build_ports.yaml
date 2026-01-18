@@ -34,3 +34,13 @@ jobs:
       port-dir: starship
       build-type: release
       upstream-repo: "HarbourMasters/Starship"
+      
+  build-spaghettikart:
+    name: Build SpaghettiKart
+    uses: ./.github/workflows/build_port.yaml
+    with:
+      port-name: "SpaghettiKart"
+      short-name: SpaghettiKart
+      port-dir: spaghettikart
+      build-type: release
+      upstream-repo: "HarbourMasters/SpaghettiKart"
