@@ -56,8 +56,18 @@ git fetch --tags
 git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 
 git submodule update --init
+
+# Verify where clang is or use the default 'clang' which is v18 on 24.04
+if ! command -v clang-18 &> /dev/null; then
+    export CC=clang
+    export CXX=clang++
+else
+    export CC=clang-18
+    export CXX=clang++-18
+fi
+
 mkdir build-soh && cd build-soh
-CC=clang-18 CXX=clang++-18 cmake .. -GNinja -DUSE_OPENGLES=1 \
+cmake .. -GNinja -DUSE_OPENGLES=1 \
  -DBUILD_CROWD_CONTROL=0 -DCMAKE_BUILD_TYPE=Release
 cmake --build . -j8
 

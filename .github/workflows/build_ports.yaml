@@ -44,3 +44,13 @@ jobs:
       port-dir: spaghettikart
       build-type: release
       upstream-repo: "HarbourMasters/SpaghettiKart"
+      
+  build-ghostship:
+    name: Build Ghostship
+    uses: ./.github/workflows/build_port.yaml
+    with:
+      port-name: "Ghostship"
+      short-name: Ghostship
+      port-dir: ghostship
+      build-type: release
+      upstream-repo: "HarbourMasters/Ghostship"
