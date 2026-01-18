@@ -1,0 +1,21 @@
+#!/bin/bash
+
+SRCDIR=$1
+DESTDIR=$2
+
+cd $DESTDIR
+
+cp $SRCDIR/Ghostship/build-ghostship/Ghostship $DESTDIR/
+cp $SRCDIR/Ghostship/build-ghostship/ghostship.o2r $DESTDIR/
+cp $SRCDIR/Ghostship/build-ghostship/gamecontrollerdb.txt $DESTDIR/
+
+cp $SRCDIR/starship/build-ghostship/TorchExternal/src/TorchExternal-build/torch \
+   $DESTDIR/tools/torch
+
+rm -r $DESTDIR/tools/assets
+rm -r $DESTDIR/tools/config.yml
+cp -r $SRCDIR/Ghostship/assets $DESTDIR/tools/
+cp -r $SRCDIR/Ghostship/config.yml $DESTDIR/tools/
+
+rm -r $DESTDIR/libs
+cp -r $SRCDIR/Ghostship/build-ghostship/libs $DESTDIR/
