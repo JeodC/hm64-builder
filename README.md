@@ -4,6 +4,8 @@ This is a simple repository to automatically obtain new release tags (once per d
 - Ship of Harkinian (used with [my Ship of Harkinian port](https://github.com/JeodC/RHH-Ports/tree/main/ports/released/harbourmasters64/soh))
 - 2 Ship 2 Harkinian (used with [my 2Ship2Harkinian port](https://github.com/JeodC/RHH-Ports/tree/main/ports/released/harbourmasters64/soh2))
 - Starship (used with [my Starship port](https://github.com/JeodC/RHH-Ports/tree/main/ports/released/harbourmasters64/starship))
+- Ghostship (used with [my SM64-Ghostship port](https://github.com/JeodC/RHH-Ports/tree/main/ports/released/harbourmasters64/sm64-ghostship))
+- SpaghettiKart (not built yet due to no release, only prerelease)
 
 Releases from *this* repository use the same descriptions as the upstream releases.
 
