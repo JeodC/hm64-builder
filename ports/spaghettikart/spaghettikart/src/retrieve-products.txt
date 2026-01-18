@@ -3,21 +3,31 @@
 SRCDIR=$1
 DESTDIR=$2
 
-cd $DESTDIR
+cd "$DESTDIR" || { echo "DESTDIR not found: $DESTDIR"; exit 1; }
 
-cp $SRCDIR/SpaghettiKart/build-opengl/spaghetti.o2r .
+cp "$SRCDIR/SpaghettiKart/build-spaghettikart/Spaghettify" "$DESTDIR/"
+cp "$SRCDIR/SpaghettiKart/build-spaghettikart/spaghetti.o2r" "$DESTDIR/"
+cp "$SRCDIR/SpaghettiKart/build-spaghettikart/gamecontrollerdb.txt" "$DESTDIR/"
 
-mkdir -p bin
-cp $SRCDIR/SpaghettiKart/build-opengl/Spaghettify bin/Spaghettify-OpenGL
-cp $SRCDIR/SpaghettiKart/build-gles/Spaghettify bin/Spaghettify-GLES
+rm -rf ./libs
+cp -r "$SRCDIR/SpaghettiKart/build-spaghettikart/libs" .
 
-rm -r libs.aarch64
-cp -r $SRCDIR/SpaghettiKart/libs.aarch64 .
+mkdir -p "$DESTDIR/tools"
 
-cd torch
-rm -r ./include
-rm -r ./yamls
-cp -r $SRCDIR/SpaghettiKart/build-opengl/yamls .
-cp $SRCDIR/SpaghettiKart/build-opengl/*.yml .
-cp -r $SRCDIR/SpaghettiKart/include .
-cp $SRCDIR/SpaghettiKart/build-opengl/TorchExternal/src/TorchExternal-build/torch .
+# Copy torch binary
+cp "$SRCDIR/SpaghettiKart/build-spaghettikart/TorchExternal/src/TorchExternal-build/torch" \
+   "$DESTDIR/tools/torch"
+
+# Remove old tools content
+rm -rf "$DESTDIR/tools/assets"
+rm -f "$DESTDIR/tools/config.yml"
+
+# Copy new tools content
+cp "$SRCDIR/SpaghettiKart/config.yml" "$DESTDIR/tools/"
+
+# Zip the entire folder as "assets/" inside the zip
+pushd "$SRCDIR/SpaghettiKart"
+zip -r "$DESTDIR/tools/assets.zip" assets/
+popd > /dev/null
+
+echo "Packaging complete. You will also need to update otrgen by hand."

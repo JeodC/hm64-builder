@@ -1,12 +1,9 @@
-sudo apt-get update
-sudo apt-get install -y clang-18
-
 git clone https://github.com/libsdl-org/SDL.git
 cd SDL
 git checkout release-2.32.0 # was 2.26.2
 mkdir -p build-starship && cd build-starship
 cmake ..
-make -j8
+make -j$(nproc)
 make install
 cd ../..
 
@@ -16,7 +13,7 @@ cd SDL_net
 git checkout release-2.2.0
 mkdir build-starship && cd build-starship
 cmake ..
-make -j8
+make -j$(nproc)
 make install
 cd ../..
 
@@ -25,7 +22,7 @@ cd libzip
 git checkout 0581df510597b46c28509e9d4b5998cf5fecb636
 mkdir build-starship && cd build-starship
 cmake ..
-make -j8
+make -j$(nproc)
 make install
 cd ../..
 
@@ -34,7 +31,7 @@ cd json
 git checkout f3dc4684b40a124cabc8554967c2cd8db54f15dd
 mkdir build-starship && cd build-starship
 cmake ..
-make -j8
+make -j$(nproc)
 make install
 cd ../..
 
@@ -43,7 +40,7 @@ cd ../..
 # git checkout 1ea1ac188ad4b9cb662e3f8314673c63df95a589
 # mkdir build-starship && cd build-starship
 # cmake ..
-# make -j8
+# make -j$(nproc)
 # make install
 # cd ../..
 
@@ -53,20 +50,16 @@ git checkout 57ec94127bda7979282315b7d4b0059eeb6f3b5d
 git checkout .
 mkdir build-starship && cd build-starship
 cmake -DBUILD_SHARED_LIBS=ON ..
-make -j8
+make -j$(nproc)
 make install
-
-# prevent this file being found by cmake when starship is compiled
-cd ..
-mv cmake/tinyxml2-config.cmake cmake/tinyxml2-config.cmake.disabled
-cd ..
+cd ../..
 
 git clone https://github.com/microsoft/GSL.git
 cd GSL
 git checkout 2828399820ef4928cc89b65605dca5dc68efca6e
 mkdir build-starship && cd build-starship
 cmake -DBUILD_SHARED_LIBS=ON ..
-make -j8
+make -j$(nproc)
 make install
 cd ../..
 
@@ -75,7 +68,7 @@ cd spdlog
 git checkout 3335c380a08c5e0f5117a66622df6afdb3d74959
 mkdir build-starship && cd build-starship
 cmake ..
-make -j8
+make -j$(nproc)
 make install
 cd ../..
 

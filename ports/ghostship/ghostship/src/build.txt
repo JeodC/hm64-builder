@@ -59,7 +59,7 @@ cd GSL
 git checkout 2828399820ef4928cc89b65605dca5dc68efca6e
 mkdir build-ghostship && cd build-ghostship
 cmake -DBUILD_SHARED_LIBS=ON ..
-make -j8
+make -j$(nproc)
 make install
 cd ../..
 
