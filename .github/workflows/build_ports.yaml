@@ -52,6 +52,6 @@ jobs:
     with:
       port-name: "Ghostship"
       short-name: Ghostship
-      port-dir: ghostship
+      port-dir: sm64-ghostship
       build-type: release
       upstream-repo: "HarbourMasters/Ghostship"
