@@ -1,0 +1,20 @@
+name: Notify Ports Repo
+on:
+  release:
+    types: [published]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Update Signal
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PORTS_REPO_PAT }}
+          repository: JeodC/RHH-Ports
+          event-type: hm64_update
+          client-payload: >
+            {
+              "version": "${{ github.event.release.tag_name }}",
+              "zip_url": "${{ github.event.release.assets[0].browser_download_url }}"
+            }

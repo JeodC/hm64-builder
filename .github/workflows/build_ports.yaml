@@ -15,6 +15,7 @@ jobs:
       port-dir: soh
       build-type: release
       upstream-repo: "HarbourMasters/Shipwright"
+    secrets: inherit
 
   build-soh2:
     name: Build Ship of Harkinian 2
@@ -25,6 +26,7 @@ jobs:
       port-dir: soh2
       build-type: release
       upstream-repo: "HarbourMasters/2ship2harkinian"
+    secrets: inherit
       
   build-starship:
     name: Build Starship
@@ -35,6 +37,7 @@ jobs:
       port-dir: starship
       build-type: release
       upstream-repo: "HarbourMasters/Starship"
+    secrets: inherit
       
   build-spaghettikart:
     name: Build SpaghettiKart
@@ -45,6 +48,7 @@ jobs:
       port-dir: spaghettikart
       build-type: release
       upstream-repo: "HarbourMasters/SpaghettiKart"
+    secrets: inherit
       
   build-ghostship:
     name: Build Ghostship
@@ -55,3 +59,4 @@ jobs:
       port-dir: sm64-ghostship
       build-type: release
       upstream-repo: "HarbourMasters/Ghostship"
+    secrets: inherit

@@ -121,3 +121,16 @@ jobs:
           makeLatest: true
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify Ports Repo
+        if: env.build == 'true'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PORTS_REPO_PAT }}
+          repository: JeodC/RHH-Ports
+          event-type: hm64_update
+          client-payload: >
+            {
+              "version": "${{ env.UPSTREAM_VERSION }}",
+              "zip_url": "https://github.com/JeodC/hm64-builder/releases/download/${{ inputs.short-name }}-${{ inputs.build-type }}-${{ env.UPSTREAM_VERSION }}/${{ inputs.port-dir }}.zip"
+            }
