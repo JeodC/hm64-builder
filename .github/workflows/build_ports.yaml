@@ -1,6 +1,19 @@
 name: Build Ports
 on:
   workflow_dispatch:
+    inputs:
+      force-port:
+        description: "Force build a specific port (bypass version check)"
+        type: choice
+        required: false
+        default: none
+        options:
+          - none
+          - soh
+          - soh2
+          - starship
+          - spaghettikart
+          - ghostship
   schedule:
     - cron: '00 14 * * *'
     - cron: '0 2 * * *'
@@ -15,6 +28,7 @@ jobs:
       port-dir: soh
       build-type: release
       upstream-repo: "HarbourMasters/Shipwright"
+      force-build: ${{ github.event.inputs.force-port == 'soh' }}
     secrets: inherit
 
   build-soh2:
@@ -26,6 +40,7 @@ jobs:
       port-dir: soh2
       build-type: release
       upstream-repo: "HarbourMasters/2ship2harkinian"
+      force-build: ${{ github.event.inputs.force-port == 'soh2' }}
     secrets: inherit
       
   build-starship:
@@ -37,6 +52,7 @@ jobs:
       port-dir: starship
       build-type: release
       upstream-repo: "HarbourMasters/Starship"
+      force-build: ${{ github.event.inputs.force-port == 'starship' }}
     secrets: inherit
       
   build-spaghettikart:
@@ -48,6 +64,7 @@ jobs:
       port-dir: spaghettikart
       build-type: release
       upstream-repo: "HarbourMasters/SpaghettiKart"
+      force-build: ${{ github.event.inputs.force-port == 'spaghettikart' }}
     secrets: inherit
       
   build-ghostship:
@@ -59,4 +76,5 @@ jobs:
       port-dir: sm64-ghostship
       build-type: release
       upstream-repo: "HarbourMasters/Ghostship"
+      force-build: ${{ github.event.inputs.force-port == 'ghostship' }}
     secrets: inherit
