@@ -132,7 +132,7 @@ jobs:
         if: env.build == 'true'
         uses: "ncipollo/release-action@v1.16.0"
         with:
-          tag: "${{ inputs.short-name }}-${{ inputs.build-type }}-${{ env.UPSTREAM_VERSION }}"
+          tag: ${{ inputs.force-build && format('{0}-nightly', inputs.short-name) || format('{0}-{1}-{2}', inputs.short-name, inputs.build-type, env.UPSTREAM_VERSION) }}
           body: "${{ env.UPSTREAM_BODY }}"
           artifacts: ports/${{ inputs.port-dir }}/*.zip
           prerelease: ${{ inputs.force-build }}
