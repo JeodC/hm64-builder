@@ -67,4 +67,10 @@ else
     echo "Warning: extractor or xml directory not found, skipping zip."
 fi
 
+# ----------------------
+# Remove .gitkeep files
+# ----------------------
+rm -rf "$DESTDIR/assets/.gitkeep"
+rm -rf "$DESTDIR/libs/.gitkeep"
+
 echo "Packaging complete. You will also need to update otrgen by hand."

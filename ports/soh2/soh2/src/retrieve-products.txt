@@ -33,5 +33,9 @@ cp -r "$SRCDIR/2ship2harkinian/mm/assets/xml" "$TEMP_ZIP_DIR/"
   zip -r "$DESTDIR/assets/extractor.zip" *
 )
 
+# Remove .gitkeep files
+rm -rf "$DESTDIR/assets/.gitkeep"
+rm -rf "$DESTDIR/libs/.gitkeep"
+
 # Clean up
 rm -rf "$TEMP_ZIP_DIR"
