@@ -1,3 +1,19 @@
+#### install packages ####
+apt update
+apt install -y \
+  build-essential \
+  autoconf \
+  automake \
+  libtool \
+  pkg-config \
+  libogg-dev \
+  libopus-dev \
+  libssl-dev \
+  libvorbis-dev \
+  wget \
+  curl
+
+#### BUILD LIBS ####
 git clone https://github.com/libsdl-org/SDL.git
 cd SDL
 git checkout release-2.32.0
@@ -57,13 +73,12 @@ make -j$(nproc)
 make install
 cd ../..
 
-sudo apt install -y libogg-dev libopus-dev libtool autoconf pkg-config
 git clone https://github.com/xiph/opusfile.git
 cd opusfile
 ./autogen.sh
 PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --prefix=/usr/local
 make -j$(nproc)
-sudo make install
+make install
 cd ..
 
 #### SoH ####
