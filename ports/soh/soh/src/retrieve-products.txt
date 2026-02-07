@@ -50,8 +50,17 @@ if [ -d "$EXTRACTOR_SRC" ] && [ -d "$XML_SRC" ]; then
     # This places filelists/ and symbols/ at the root level
     cp -r "$EXTRACTOR_SRC/." tmp_zip/
     
-    # Copy the xml directory itself
+    # 2. Copy the xml directory itself
     cp -r "$XML_SRC" tmp_zip/
+
+    # 3. Create the new extractor subfolder for the binary tool
+    if [ -f "$ZAPD_BIN" ]; then
+        mkdir -p tmp_zip/extractor
+        cp "$ZAPD_BIN" tmp_zip/extractor/ZAPD.out
+        chmod +x tmp_zip/extractor/ZAPD.out
+    else
+        echo "Warning: ZAPD.out not found"
+    fi
 
     # Zip the contents
     cd tmp_zip || exit 1
@@ -60,6 +69,9 @@ if [ -d "$EXTRACTOR_SRC" ] && [ -d "$XML_SRC" ]; then
 
     # Cleanup staging area
     rm -rf tmp_zip
+else
+    echo "Error: Required asset source directories missing."
+    exit 1
 fi
 
 # ----------------------
@@ -67,3 +79,5 @@ fi
 # ----------------------
 rm -rf "$DESTDIR/assets/.gitkeep"
 rm -rf "$DESTDIR/libs/.gitkeep"
+
+echo "Packaging complete. You will also need to update otrgen by hand."
