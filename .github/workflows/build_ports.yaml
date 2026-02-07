@@ -32,10 +32,10 @@ jobs:
     secrets: inherit
 
   build-soh2:
-    name: Build Ship of Harkinian 2
+    name: Build 2Ship2Harkinian
     uses: ./.github/workflows/build_port.yaml
     with:
-      port-name: "Ship of Harkinian 2"
+      port-name: "2Ship2Harkinian"
       short-name: SoH2
       port-dir: soh2
       build-type: release
