@@ -93,12 +93,14 @@ else
 fi
 
 mkdir build-starship && cd build-starship
-cmake .. -GNinja -DUSE_OPENGLES=1 \
- -DBUILD_CROWD_CONTROL=0 -DCMAKE_BUILD_TYPE=Release \
- -DCMAKE_CXX_FLAGS=-ldl
+cmake .. -GNinja
+-DUSE_OPENGLES=1 \
+-DBUILD_CROWD_CONTROL=0 \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_CXX_FLAGS=-ldl
 
-cmake --build . -j8 --config Release --target GeneratePortO2R
-cmake --build . -j8
+cmake --build . -j$(nproc) --config Release --target GeneratePortO2R
+cmake --build . -j$(nproc)
 
 # Collate libs
 mkdir libs

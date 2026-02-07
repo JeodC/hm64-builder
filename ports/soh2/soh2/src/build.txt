@@ -83,9 +83,8 @@ cmake .. -GNinja \
 -DBUILD_CROWD_CONTROL=0 \
 -DCMAKE_BUILD_TYPE=Release
 
-cmake --build . -j$(nproc)
-
 cmake --build . --target Generate2ShipOtr -j$(nproc)
+cmake --build . -j$(nproc)
 
 mkdir libs
 cp /usr/lib/aarch64-linux-gnu/libz.so.1 libs/
