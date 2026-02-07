@@ -48,6 +48,24 @@ cd ..
 mv cmake/tinyxml2-config.cmake cmake/tinyxml2-config.cmake.disabled
 cd ..
 
+git clone https://github.com/xiph/opus.git
+cd opus
+git checkout v1.5.2
+mkdir build-soh && cd build-soh
+cmake -DBUILD_SHARED_LIBS=ON ..
+make -j$(nproc)
+make install
+cd ../..
+
+sudo apt install -y libogg-dev libopus-dev libtool autoconf pkg-config
+git clone https://github.com/xiph/opusfile.git
+cd opusfile
+./autogen.sh
+PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --prefix=/usr/local
+make -j$(nproc)
+sudo make install
+cd ..
+
 #### 2S2H ####
 
 git clone https://github.com/HarbourMasters/2ship2harkinian.git
@@ -88,11 +106,15 @@ cmake --build . -j$(nproc)
 
 mkdir libs
 cp /usr/lib/aarch64-linux-gnu/libz.so.1 libs/
+cp /usr/lib/aarch64-linux-gnu/libogg.so.[0-9]* libs/
 cp /usr/lib/aarch64-linux-gnu/libpng16.so.16 libs/
 cp /usr/lib/aarch64-linux-gnu/libspdlog.so.1 libs/
 cp /usr/local/lib/libbz2.so.[0-9]* libs/
 cp /usr/local/lib/libzip.so.[0-9]* libs/
 cp /usr/local/lib/libtinyxml2.so.[0-9]* libs/
+cp /usr/local/lib/libopus.so.[0-9]* libs/
+cp /usr/local/lib/libopusfile.so.[0-9]* libs/
+
 find ./libs/ -name "*.so.[0-9]*.[0-9]*" -delete
 
 cd ../..
