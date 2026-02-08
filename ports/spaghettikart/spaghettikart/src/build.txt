@@ -1,108 +1,161 @@
+# ========================
+# System setup
+# ========================
+
+apt update
+apt install -y \
+  build-essential \
+  git \
+  python3 \
+  python3-pip \
+  wget \
+  gnupg \
+  lsb-release \
+  pkg-config \
+  unzip \
+  cmake
+
+# ========================
+# LLVM / Clang-18
+# ========================
+
+wget https://apt.llvm.org/llvm.sh
+chmod +x llvm.sh
+./llvm.sh 18
+
+apt install -y \
+  clang-18 \
+  clang-tools-18 \
+  libc++-18-dev \
+  libc++abi-18-dev
+
+# ========================
+# Ninja
+# ========================
+
+git clone https://github.com/ninja-build/ninja.git
+cd ninja
+git checkout v1.11.1
+./configure.py --bootstrap
+install -m 755 ninja /usr/local/bin/ninja
+cd ..
+
+# ========================
+# Global toolchain
+# ========================
+
+export CC=clang-18
+export CXX=clang++-18
+export CFLAGS="-O3 -DNDEBUG -flto"
+export CXXFLAGS="-O3 -DNDEBUG -flto -stdlib=libc++"
+export LDFLAGS="-stdlib=libc++ -ldl -lrt -lm -pthread"
+export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/lib/pkgconfig"
+
+# ========================
+# Dependencies (all shared)
+# ========================
+
+# SDL2
 git clone https://github.com/libsdl-org/SDL.git
 cd SDL
-git checkout release-2.32.0 # was 2.26.2
-mkdir -p build-spaghettikart && cd build-spaghettikart
-cmake ..
-make -j$(nproc)
-make install
-cd ../..
+git checkout release-2.32.0
+cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+ninja -C build
+ninja -C build install
+cd ..
 
-# not needed?
-git clone https://github.com/libsdl-org/SDL_net.git
-cd SDL_net
-git checkout release-2.2.0
-mkdir build-spaghettikart && cd build-spaghettikart
-cmake ..
-make -j$(nproc)
-make install
-cd ../..
+# fmt
+git clone https://github.com/fmtlib/fmt.git
+cd fmt
+git checkout 10.1.1
+cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+ninja -C build
+ninja -C build install
+cd ..
 
+# libzip
 git clone https://github.com/nih-at/libzip.git
 cd libzip
 git checkout 0581df510597b46c28509e9d4b5998cf5fecb636
-mkdir build-spaghettikart && cd build-spaghettikart
-cmake ..
-make -j$(nproc)
-make install
-cd ../..
+cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+ninja -C build
+ninja -C build install
+cd ..
 
+# nlohmann/json (header-only, shared not applicable)
 git clone https://github.com/nlohmann/json.git
 cd json
 git checkout f3dc4684b40a124cabc8554967c2cd8db54f15dd
-mkdir build-spaghettikart && cd build-spaghettikart
-cmake ..
-make -j$(nproc)
-make install
-cd ../..
+cmake -GNinja -B build
+ninja -C build install
+cd ..
 
-# git clone https://github.com/libarchive/bzip2.git
-# cd bzip2
-# git checkout 1ea1ac188ad4b9cb662e3f8314673c63df95a589
-# mkdir build-spaghettikart && cd build-spaghettikart
-# cmake ..
-# make -j$(nproc)
-# make install
-# cd ../..
+# bzip2
+git clone https://github.com/libarchive/bzip2.git
+cd bzip2
+git checkout 1ea1ac188ad4b9cb662e3f8314673c63df95a589
+cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=ON \
+      -DCMAKE_C_COMPILER=clang-18 \
+      -DCMAKE_CXX_COMPILER=clang++-18 \
+      -DCMAKE_C_FLAGS="-O3 -DNDEBUG -flto" \
+      -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -flto -stdlib=libc++"
+ninja -C build -j$(nproc)
+ninja -C build install
+cd ..
 
+# tinyxml2
 git clone https://github.com/leethomason/tinyxml2.git
 cd tinyxml2
 git checkout 57ec94127bda7979282315b7d4b0059eeb6f3b5d
-git checkout .
-mkdir build-spaghettikart && cd build-spaghettikart
-cmake -DBUILD_SHARED_LIBS=ON ..
-make -j$(nproc)
-make install
-cd ../..
+cmake -GNinja -B build -DBUILD_SHARED_LIBS=ON
+ninja -C build
+ninja -C build install
+cd ..
 
+# GSL
 git clone https://github.com/microsoft/GSL.git
 cd GSL
 git checkout 2828399820ef4928cc89b65605dca5dc68efca6e
-mkdir build-spaghettikart && cd build-spaghettikart
-cmake -DBUILD_SHARED_LIBS=ON ..
-make -j$(nproc)
-make install
-cd ../..
+cmake -GNinja -B build -DBUILD_SHARED_LIBS=ON
+ninja -C build
+ninja -C build install
+cd ..
 
+# spdlog
 git clone https://github.com/gabime/spdlog.git
 cd spdlog
 git checkout 3335c380a08c5e0f5117a66622df6afdb3d74959
-mkdir build-spaghettikart && cd build-spaghettikart
-cmake ..
-make -j$(nproc)
-make install
-cd ../..
+cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+ninja -C build
+ninja -C build install
+cd ..
 
-## SpaghettiKart
+# ========================
+# SpaghettiKart
+# ========================
 
-# Clone the repo and enter the directory
 git clone https://github.com/HarbourMasters/SpaghettiKart.git
 cd SpaghettiKart
-
-# Clone the submodules
 git submodule update --init --recursive
 
-# Verify where clang is or use the default 'clang' which is v18 on 24.04
-if ! command -v clang-18 &> /dev/null; then
-    export CC=clang
-    export CXX=clang++
-else
-    export CC=clang-18
-    export CXX=clang++-18
-fi
+cmake -GNinja -B build-spaghettikart \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_COMPILER=clang-18 \
+  -DCMAKE_CXX_COMPILER=clang++-18 \
+  -DCMAKE_CXX_STANDARD=20 \
+  -DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG -flto -stdlib=libc++" \
+  -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++ -ldl -lrt -lm -pthread" \
+  -DUSE_OPENGLES=1 \
+  -DBUILD_CROWD_CONTROL=0
 
-mkdir build-spaghettikart && cd build-spaghettikart
-cmake .. -GNinja \
--DCMAKE_C_FLAGS_RELEASE="-O3 -DNDEBUG -Wall -Wextra -flto -pipe" \
--DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG -Wall -Wextra -flto -pipe" \
--DCMAKE_EXE_LINKER_FLAGS="-flto -ldl -pthread" \
--DUSE_OPENGLES=1 \
--DBUILD_CROWD_CONTROL=0 \
--DCMAKE_BUILD_TYPE=Release
+ninja -C build-spaghettikart GenerateO2R
+ninja -C build-spaghettikart -j$(nproc)
 
-cmake --build . -j$(nproc) --config Release --target GenerateO2R
-cmake --build . -j$(nproc)
+# ========================
+# Gather runtime libs
+# ========================
 
-# Collate libs
 mkdir libs
 cp /usr/lib/aarch64-linux-gnu/libogg.so.[0-9]* ./libs/
 cp /usr/lib/aarch64-linux-gnu/libvorbis.so.[0-9]* ./libs/
