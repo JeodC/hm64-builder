@@ -1,28 +1,40 @@
 FROM ubuntu:focal
-
 ENV DEBIAN_FRONTEND=noninteractive
+# Base utilities
+RUN apt update && apt install -y --no-install-recommends \
+    ca-certificates apt-utils \
+    wget curl nano whiptail \
+    lsb-release gnupg software-properties-common
 
-RUN apt update
+# Add LLVM apt repository
+RUN wget https://apt.llvm.org/llvm.sh && \
+    chmod +x llvm.sh && \
+    ./llvm.sh 18 && \
+    rm llvm.sh
 
+# Build dependencies
 RUN apt install -y --no-install-recommends \
-        whiptail ca-certificates apt-utils nano wget curl \
-        lsb-release
+    make gcc g++ \
+    clang-18 lld-18 \
+    libstdc++-10-dev \
+    git ninja-build \
+    libsdl2-dev libsdl2-net-dev \
+    libpng-dev libzip-dev \
+    zipcmp zipmerge ziptool \
+    nlohmann-json3-dev libtinyxml2-dev \
+    libboost-dev libopengl-dev \
+    libogg-dev libvorbis-dev
 
-RUN apt install -y --no-install-recommends \
-        make gcc g++
+# Newer CMake
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.31.3/cmake-3.31.3-linux-$(uname -m).sh && \
+    chmod +x cmake-3.31.3-linux-$(uname -m).sh && \
+    ./cmake-3.31.3-linux-$(uname -m).sh --prefix=/usr/local --exclude-subdir --skip-license && \
+    rm cmake-3.31.3-linux-$(uname -m).sh
 
-RUN apt-get install -y --no-install-recommends \
-        clang lld git cmake ninja-build lsb-release libsdl2-dev \
-        libpng-dev libsdl2-net-dev libzip-dev zipcmp zipmerge \
-        ziptool nlohmann-json3-dev libtinyxml2-dev libspdlog-dev \
-        libboost-dev libopengl-dev libogg-dev libvorbis-dev \
-        libstdc++-10-dev
+# Use clang-18 by default
+ENV CC=clang-18
+ENV CXX=clang++-18
+ENV LD=lld-18
 
-# newer version of cmake
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.31.3/cmake-3.31.3-linux-`uname -m`.sh
-RUN chmod a+x ./cmake-3.31.3-linux-`uname -m`.sh
-RUN ./cmake-3.31.3-linux-`uname -m`.sh --prefix=/usr/local --exclude-subdir --skip-license
-
-WORKDIR "/root"
-
+WORKDIR /root
 CMD ["bash"]

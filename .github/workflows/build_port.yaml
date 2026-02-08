@@ -123,16 +123,20 @@ jobs:
           echo ${{ inputs.port-dir }}.zip >> .gitignore
           echo ".gitignore" >> .gitignore
 
-      - name: Get current date
-        id: date
+      - name: Set release tag
+        if: env.build == 'true'
         run: |
-          echo "name=$(date +'%Y-%m-%d')" > "$GITHUB_OUTPUT"
+          if [[ "${{ inputs.force-build }}" == "true" ]]; then
+            echo "RELEASE_TAG=${{ inputs.short-name }}-nightly" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=${{ inputs.short-name }}-${{ inputs.build-type }}-${{ env.UPSTREAM_VERSION }}" >> $GITHUB_ENV
+          fi
    
       - name: Create release
         if: env.build == 'true'
         uses: "ncipollo/release-action@v1.16.0"
         with:
-          tag: ${{ inputs.force-build && format('{0}-nightly', inputs.short-name) || format('{0}-{1}-{2}', inputs.short-name, inputs.build-type, env.UPSTREAM_VERSION) }}
+          tag: ${{ env.RELEASE_TAG }}
           body: "${{ env.UPSTREAM_BODY }}"
           artifacts: ports/${{ inputs.port-dir }}/*.zip
           prerelease: ${{ inputs.force-build }}
@@ -141,7 +145,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Notify Ports Repo
-        if: env.build == 'true'
+        if: env.build == 'true' && inputs.force-build != true
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PORTS_REPO_PAT }}
@@ -150,5 +154,5 @@ jobs:
           client-payload: >
             {
               "version": "${{ env.UPSTREAM_VERSION }}",
-              "zip_url": "https://github.com/JeodC/hm64-builder/releases/download/${{ inputs.short-name }}-${{ inputs.build-type }}-${{ env.UPSTREAM_VERSION }}/${{ inputs.port-dir }}.zip"
+              zip_url: "https://github.com/JeodC/hm64-builder/releases/download/${{ env.RELEASE_TAG }}/${{ inputs.port-dir }}.zip"
             }

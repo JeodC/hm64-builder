@@ -13,7 +13,7 @@ jobs:
           token: ${{ secrets.PORTS_REPO_PAT }}
           repository: JeodC/RHH-Ports
           event-type: hm64_update
-          client-payload: >
+          client-payload: |
             {
               "version": "${{ github.event.release.tag_name }}",
               "zip_url": "${{ github.event.release.assets[0].browser_download_url }}"

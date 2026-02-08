@@ -63,54 +63,62 @@ make -j$(nproc)
 make install
 cd ../..
 
-git clone https://github.com/gabime/spdlog.git
-cd spdlog
-git checkout 3335c380a08c5e0f5117a66622df6afdb3d74959
-mkdir build-spaghettikart && cd build-spaghettikart
-cmake ..
+# Build fmt
+git clone https://github.com/fmtlib/fmt.git
+cd fmt
+git checkout 10.1.1
+mkdir build && cd build
+cmake -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
 make -j$(nproc)
 make install
 cd ../..
 
-## SpaghettiKart
+git clone https://github.com/gabime/spdlog.git
+cd spdlog
+git checkout 3335c380a08c5e0f5117a66622df6afdb3d74959
+mkdir build && cd build
+cmake -DSPDLOG_FMT_EXTERNAL=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
+make -j$(nproc)
+make install
+cd ../..
 
-# Clone the repo and enter the directory
-git clone https://github.com/HarbourMasters/SpaghettiKart.git
+## spaghettikart
+
+git clone https://github.com/JeodC/SpaghettiKart.git
 cd SpaghettiKart
+
+git fetch --tags
+git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 
 # Clone the submodules
 git submodule update --init --recursive
 
-# Verify where clang is or use the default 'clang' which is v18 on 24.04
-if ! command -v clang-18 &> /dev/null; then
-    export CC=clang
-    export CXX=clang++
-else
-    export CC=clang-18
-    export CXX=clang++-18
-fi
-
 mkdir build-spaghettikart && cd build-spaghettikart
 cmake .. -GNinja \
--DCMAKE_C_FLAGS_RELEASE="-O3 -DNDEBUG -Wall -Wextra -flto -pipe" \
--DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG -Wall -Wextra -flto -pipe" \
--DCMAKE_EXE_LINKER_FLAGS="-flto -ldl -pthread" \
--DUSE_OPENGLES=1 \
--DBUILD_CROWD_CONTROL=0 \
--DCMAKE_BUILD_TYPE=Release
+  -DCMAKE_C_COMPILER=clang-18 \
+  -DCMAKE_CXX_COMPILER=clang++-18 \
+  -DUSE_OPENGLES=1 \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_FLAGS="-fno-strict-aliasing -funsigned-char" \
+  -DCMAKE_CXX_FLAGS="-Wno-macro-redefined -fno-strict-aliasing -funsigned-char" \
+  -DCMAKE_EXE_LINKER_FLAGS="-ldl -pthread -Wl,--no-relax"
 
 cmake --build . -j$(nproc) --config Release --target GenerateO2R
 cmake --build . -j$(nproc)
 
-# Collate libs
+# Collect system libraries
 mkdir libs
 cp /usr/lib/aarch64-linux-gnu/libogg.so.[0-9]* ./libs/
 cp /usr/lib/aarch64-linux-gnu/libvorbis.so.[0-9]* ./libs/
 cp /usr/lib/aarch64-linux-gnu/libvorbisenc.so.[0-9]* ./libs/
 cp /usr/lib/aarch64-linux-gnu/libvorbisfile.so.[0-9]* ./libs/
 cp /usr/lib/aarch64-linux-gnu/libz.so.[0-9]* ./libs/
+
+# Libraries built from source
+cp /usr/local/lib/libbz2.so.[0-9]* libs/
 cp /usr/local/lib/libzip.so.[0-9]* ./libs/
 cp /usr/local/lib/libtinyxml2.so.[0-9]* ./libs/
+
 find ./libs/ -name "*.so.[0-9]*.[0-9]*" -delete
 
 cd ../..

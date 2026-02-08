@@ -7,7 +7,7 @@ cd "$DESTDIR" || { echo "DESTDIR not found: $DESTDIR"; exit 1; }
 
 cp "$SRCDIR/SpaghettiKart/build-spaghettikart/Spaghettify" "$DESTDIR/"
 cp "$SRCDIR/SpaghettiKart/build-spaghettikart/spaghetti.o2r" "$DESTDIR/"
-cp "$SRCDIR/SpaghettiKart/build-spaghettikart/gamecontrollerdb.txt" "$DESTDIR/"
+wget -O "$DESTDIR/gamecontrollerdb.txt" "https://raw.githubusercontent.com/mdqinc/SDL_GameControllerDB/master/gamecontrollerdb.txt"
 
 rm -rf ./libs
 cp -r "$SRCDIR/SpaghettiKart/build-spaghettikart/libs" .
@@ -19,15 +19,15 @@ cp "$SRCDIR/SpaghettiKart/build-spaghettikart/TorchExternal/src/TorchExternal-bu
    "$DESTDIR/tools/torch"
 
 # Remove old tools content
-rm -rf "$DESTDIR/tools/assets"
+rm -rf "$DESTDIR/tools/yamls"
 rm -f "$DESTDIR/tools/config.yml"
 
 # Copy new tools content
-cp "$SRCDIR/SpaghettiKart/config.yml" "$DESTDIR/tools/"
+cp "$SRCDIR/SpaghettiKart/config.yml" "$DESTDIR/tools"
 
 # Zip the entire folder as "assets/" inside the zip
 pushd "$SRCDIR/SpaghettiKart"
-zip -r "$DESTDIR/tools/assets.zip" assets/
+zip -r "$DESTDIR/tools/assets.zip" yamls/ meta/ include/
 popd > /dev/null
 
 echo "Packaging complete. You will also need to update otrgen by hand."
