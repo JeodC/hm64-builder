@@ -1,8 +1,20 @@
 git clone https://github.com/libsdl-org/SDL.git
 cd SDL
-git checkout release-2.32.0 # was 2.26.2
-mkdir -p build-spaghettikart && cd build-spaghettikart
-cmake ..
+git checkout release-2.32.0
+
+mkdir -p build-spaghettikart
+cd build-spaghettikart
+
+cmake .. \
+  -DSDL_VIDEO_OPENGL=OFF \
+  -DSDL_VIDEO_OPENGL_GLX=OFF \
+  -DSDL_VIDEO_OPENGL_EGL=ON \
+  -DSDL_VIDEO_OPENGL_ES2=ON \
+  -DSDL_VIDEO_VULKAN=OFF \
+  -DSDL_OPENGLES=ON \
+  -DSDL_STATIC=OFF \
+  -DSDL_SHARED=ON
+
 make -j$(nproc)
 make install
 cd ../..
@@ -93,17 +105,22 @@ git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 # Clone the submodules
 git submodule update --init --recursive
 
+# Add a special print to debug a crash
+sed -i '/int8_t opcode = (int8_t)(cmd->words.w0 >> 24);/a \
+    printf("OP: 0x%02X | w1: 0x%08X\\n", (uint8_t)(cmd->words.w0 >> 24), (uint32_t)cmd->words.w1);
+' libultraship/src/fast/interpreter.cpp
+
 mkdir build-spaghettikart && cd build-spaghettikart
 cmake .. -GNinja \
   -DCMAKE_C_COMPILER=clang-18 \
   -DCMAKE_CXX_COMPILER=clang++-18 \
   -DUSE_OPENGLES=1 \
-  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_C_FLAGS="-fno-strict-aliasing -funsigned-char" \
-  -DCMAKE_CXX_FLAGS="-Wno-macro-redefined -fno-strict-aliasing -funsigned-char" \
+  -DCMAKE_CXX_FLAGS="-fno-strict-aliasing -funsigned-char" \
   -DCMAKE_EXE_LINKER_FLAGS="-ldl -pthread -Wl,--no-relax"
 
-cmake --build . -j$(nproc) --config Release --target GenerateO2R
+cmake --build . -j$(nproc) --config Debug --target GenerateO2R
 cmake --build . -j$(nproc)
 
 # Collect system libraries

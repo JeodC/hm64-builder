@@ -6,6 +6,7 @@ DESTDIR=$2
 cd "$DESTDIR" || { echo "DESTDIR not found: $DESTDIR"; exit 1; }
 
 cp "$SRCDIR/SpaghettiKart/build-spaghettikart/Spaghettify" "$DESTDIR/"
+cp "$SRCDIR/SpaghettiKart/build-spaghettikart/Spaghettify.pdb" "$DESTDIR/"
 cp "$SRCDIR/SpaghettiKart/build-spaghettikart/spaghetti.o2r" "$DESTDIR/"
 wget -O "$DESTDIR/gamecontrollerdb.txt" "https://raw.githubusercontent.com/mdqinc/SDL_GameControllerDB/master/gamecontrollerdb.txt"
 
