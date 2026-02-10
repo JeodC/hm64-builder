@@ -94,17 +94,33 @@ make -j$(nproc)
 make install
 cd ../..
 
-## spaghettikart
+## SpaghettiKart ##
 
 git clone https://github.com/HarbourMasters/SpaghettiKart.git
 cd SpaghettiKart
 
+# Checkout latest tag
 git fetch --tags
 git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 
-# Clone the submodules
+
+# Grab SpaghettiKart PR
+git remote add jeodc https://github.com/JeodC/SpaghettiKart.git 2>/dev/null || true
+git fetch jeodc pull/650/head:pr-650-spaghettikart
+git checkout pr-650-spaghettikart
+
+# Initialize and sync submodules
+git submodule sync
 git submodule update --init --recursive
 
+# Grab libultraship PR
+cd libultraship
+git remote add jeodc-lib https://github.com/JeodC/libultraship.git 2>/dev/null || true
+git fetch jeodc-lib pull/1004/head:pr-1004-libultraship
+git checkout pr-1004-libultraship
+cd ..
+
+## Build
 mkdir build-spaghettikart && cd build-spaghettikart
 cmake .. -GNinja \
   -DCMAKE_C_COMPILER=clang-18 \
