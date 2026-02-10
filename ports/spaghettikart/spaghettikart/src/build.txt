@@ -96,7 +96,7 @@ cd ../..
 
 ## spaghettikart
 
-git clone https://github.com/JeodC/SpaghettiKart.git
+git clone https://github.com/HarbourMasters/SpaghettiKart.git
 cd SpaghettiKart
 
 git fetch --tags
@@ -104,11 +104,6 @@ git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 
 # Clone the submodules
 git submodule update --init --recursive
-
-# Add a special print to debug a crash
-sed -i '/int8_t opcode = (int8_t)(cmd->words.w0 >> 24);/a \
-    printf("OP: 0x%02X | w1: 0x%08X\\n", (uint8_t)(cmd->words.w0 >> 24), (uint32_t)cmd->words.w1);
-' libultraship/src/fast/interpreter.cpp
 
 mkdir build-spaghettikart && cd build-spaghettikart
 cmake .. -GNinja \
