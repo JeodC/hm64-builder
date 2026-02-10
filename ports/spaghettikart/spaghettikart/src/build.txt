@@ -105,8 +105,7 @@ git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 
 
 # Grab SpaghettiKart PR
-git remote add jeodc https://github.com/JeodC/SpaghettiKart.git 2>/dev/null || true
-git fetch jeodc pull/650/head:pr-650-spaghettikart
+git fetch origin pull/650/head:pr-650-spaghettikart
 git checkout pr-650-spaghettikart
 
 # Initialize and sync submodules
@@ -115,8 +114,9 @@ git submodule update --init --recursive
 
 # Grab libultraship PR
 cd libultraship
-git remote add jeodc-lib https://github.com/JeodC/libultraship.git 2>/dev/null || true
-git fetch jeodc-lib pull/1004/head:pr-1004-libultraship
+# PR 1004 is on Kenix3's fork of libultraship
+git remote add kenix https://github.com/Kenix3/libultraship.git 2>/dev/null || true
+git fetch kenix pull/1004/head:pr-1004-libultraship
 git checkout pr-1004-libultraship
 cd ..
 
