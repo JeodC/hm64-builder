@@ -1,45 +1,44 @@
 FROM ubuntu:focal
-
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update
+# Base utilities
+RUN apt update && apt install -y --no-install-recommends \
+    ca-certificates apt-utils \
+    wget curl nano whiptail \
+    lsb-release gnupg software-properties-common
 
+# Add LLVM apt repository
+RUN wget https://apt.llvm.org/llvm.sh && \
+    chmod +x llvm.sh && \
+    ./llvm.sh 18 && \
+    rm llvm.sh
+
+# Build dependencies
 RUN apt install -y --no-install-recommends \
-        whiptail ca-certificates apt-utils nano wget curl \
-        lsb-release
+    make gcc g++ \
+    clang-18 lld-18 \
+    libstdc++-10-dev \
+    git ninja-build \
+    pkg-config \
+    libsdl2-dev libsdl2-net-dev \
+    libpng-dev libzip-dev \
+    zipcmp zipmerge ziptool \
+    nlohmann-json3-dev libtinyxml2-dev \
+    libboost-dev libopengl-dev \
+    libogg-dev libvorbis-dev \
+    libopus-dev libopusfile-dev \
+    libasound2-dev libpulse-dev
 
-RUN apt install -y --no-install-recommends \
-        build-essential git make cmake \
-        pkg-config cmake ninja-build
+# Newer CMake
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.31.3/cmake-3.31.3-linux-$(uname -m).sh && \
+    chmod +x cmake-3.31.3-linux-$(uname -m).sh && \
+    ./cmake-3.31.3-linux-$(uname -m).sh --prefix=/usr/local --exclude-subdir --skip-license && \
+    rm cmake-3.31.3-linux-$(uname -m).sh
 
-# SDL2 dependencies
-RUN apt install -y --no-install-recommends \
- git make pkg-config cmake ninja-build gnome-desktop-testing \
- libasound2-dev libpulse-dev \
- libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
- libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev \
- libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
- libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev fcitx-libs-dev \
- libwayland-dev
+# Use clang-18 by default
+ENV CC=clang-18
+ENV CXX=clang++-18
+ENV LD=lld-18
 
-# SoH deps
-RUN apt install -y --no-install-recommends \
-	ninja-build lsb-release libpng-dev zipcmp zipmerge \
-        ziptool libspdlog-dev libboost-dev libopengl-dev imagemagick
-
-RUN apt install -y --no-install-recommends \
-        clang-18
-
-# S2H2 deps
-RUN apt install -y --no-install-recommends \
-	libogg-dev libvorbis-dev \
-	libopus-dev libopusfile-dev
-
-# newer version of cmake
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.31.3/cmake-3.31.3-linux-`uname -m`.sh
-RUN chmod a+x ./cmake-3.31.3-linux-`uname -m`.sh
-RUN ./cmake-3.31.3-linux-`uname -m`.sh --prefix=/usr/local --exclude-subdir --skip-license
-
-WORKDIR "/root"
-
+WORKDIR /root
 CMD ["bash"]

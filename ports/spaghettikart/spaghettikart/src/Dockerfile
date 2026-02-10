@@ -1,5 +1,6 @@
 FROM ubuntu:focal
 ENV DEBIAN_FRONTEND=noninteractive
+
 # Base utilities
 RUN apt update && apt install -y --no-install-recommends \
     ca-certificates apt-utils \
