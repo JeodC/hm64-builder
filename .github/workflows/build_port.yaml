@@ -154,5 +154,5 @@ jobs:
           client-payload: >
             {
               "version": "${{ env.UPSTREAM_VERSION }}",
-              zip_url: "https://github.com/JeodC/hm64-builder/releases/download/${{ env.RELEASE_TAG }}/${{ inputs.port-dir }}.zip"
+              "zip_url": "https://github.com/JeodC/hm64-builder/releases/download/${{ env.RELEASE_TAG }}/${{ inputs.port-dir }}.zip"
             }
