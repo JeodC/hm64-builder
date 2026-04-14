@@ -8,6 +8,7 @@ The releases contain binaries and required files for the following:
 - Starship (used with [my Starship port](https://github.com/JeodC/RHH-Ports/tree/main/ports/released/harbourmasters64/starship))
 - Ghostship (used with [my SM64-Ghostship port](https://github.com/JeodC/RHH-Ports/tree/main/ports/released/harbourmasters64/sm64-ghostship))
 - SpaghettiKart (used with [my SpaghettiKart port](https://github.com/JeodC/RHH-Ports/tree/main/ports/released/harbourmasters64/spaghettikart))
+- PaperBoat (not released yet)
 
 Releases from *this* repository use the same descriptions as the upstream releases.
 

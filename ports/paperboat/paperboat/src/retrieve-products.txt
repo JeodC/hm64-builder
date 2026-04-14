@@ -1,0 +1,33 @@
+#!/bin/bash
+
+SRCDIR=$1
+DESTDIR=$2
+
+cd "$DESTDIR" || { echo "DESTDIR not found: $DESTDIR"; exit 1; }
+
+cp "$SRCDIR/paperboat/build-paperboat/Paperboat" "$DESTDIR/"
+cp "$SRCDIR/paperboat/build-paperboat/paperboat.o2r" "$DESTDIR/"
+cp "$SRCDIR/paperboat/build-paperboat/gamecontrollerdb.txt" "$DESTDIR/"
+
+rm -rf ./libs
+cp -r "$SRCDIR/paperboat/build-paperboat/libs" .
+
+mkdir -p "$DESTDIR/tools"
+
+# Copy torch binary
+cp "$SRCDIR/paperboat/build-paperboat/TorchExternal/src/TorchExternal-build/torch" \
+   "$DESTDIR/tools/torch"
+
+# Remove old tools content
+rm -rf "$DESTDIR/tools/assets"
+rm -f "$DESTDIR/tools/config.yml"
+
+# Copy new tools content
+cp "$SRCDIR/paperboat/config.yml" "$DESTDIR/tools/"
+
+# Zip the entire folder as "assets/" inside the zip
+pushd "$SRCDIR/paperboat"
+zip -r "$DESTDIR/tools/assets.zip" assets/
+popd > /dev/null
+
+echo "Packaging complete. You will also need to update otrgen by hand."

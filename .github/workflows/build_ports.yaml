@@ -14,6 +14,7 @@ on:
           - starship
           - spaghettikart
           - ghostship
+          - paperboat
   schedule:
     - cron: '00 14 * * *'
     - cron: '0 2 * * *'
@@ -77,4 +78,16 @@ jobs:
       build-type: release
       upstream-repo: "HarbourMasters/Ghostship"
       force-build: ${{ github.event.inputs.force-port == 'ghostship' }}
+    secrets: inherit
+    
+  build-paperboat:
+    name: Build Paperboat
+    uses: ./.github/workflows/build_port.yaml
+    with:
+      port-name: "Paperboat"
+      short-name: Paperboat
+      port-dir: paperboat
+      build-type: release
+      upstream-repo: "HarbourMasters/PaperBoat"
+      force-build: ${{ github.event.inputs.force-port == 'paperboat' }}
     secrets: inherit
