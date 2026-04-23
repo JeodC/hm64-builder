@@ -111,6 +111,8 @@ jobs:
 
       - name: Build port
         if: env.build == 'true'
+        env:
+          FORCE_HEAD: ${{ inputs.force-build }}
         run: |
           ./tools/build_port.sh ports/${{ inputs.port-dir }}/${{ inputs.port-dir }}
 

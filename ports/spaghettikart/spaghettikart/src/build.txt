@@ -1,3 +1,5 @@
+set -e
+
 # Build SDL2 2.32 from source so the other libraries we build below link
 # against a modern SDL2 at build time. We do NOT ship libSDL2-2.0.so.0 —
 # every supported device already provides one, often with device-specific
@@ -103,9 +105,13 @@ cd ../..
 git clone https://github.com/HarbourMasters/SpaghettiKart.git
 cd SpaghettiKart
 
-# Checkout latest tag
+# Checkout latest tag, or branch HEAD if FORCE_HEAD is set
 git fetch --tags
-git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+if [[ "${FORCE_HEAD:-false}" == "true" ]]; then
+  echo "FORCE_HEAD=true — building from branch HEAD (nightly)"
+else
+  git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+fi
 
 # Initialize and sync submodules
 git submodule sync

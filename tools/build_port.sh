@@ -21,6 +21,6 @@ bash $HOSTROOT/$SETUPSCRIPT $PORTNAME-build
 
 sleep 5
 
-docker exec $PORTNAME-build /bin/bash -c "cd $BUILDDIR && bash $DOCKERROOT/$BUILDSCRIPT"
+docker exec -e FORCE_HEAD=${FORCE_HEAD:-false} $PORTNAME-build /bin/bash -c "cd $BUILDDIR && bash $DOCKERROOT/$BUILDSCRIPT"
 
 bash $HOSTROOT/$PRODUCTSCRIPT $HOSTROOT/$BUILDDIR $HOSTROOT/$PORTDIR
