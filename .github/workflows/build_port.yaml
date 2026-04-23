@@ -36,7 +36,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: |
             releases
@@ -136,7 +136,7 @@ jobs:
    
       - name: Create release
         if: env.build == 'true'
-        uses: "ncipollo/release-action@v1.16.0"
+        uses: "ncipollo/release-action@v1.21.0"
         with:
           tag: ${{ env.RELEASE_TAG }}
           body: "${{ env.UPSTREAM_BODY }}"
@@ -148,7 +148,7 @@ jobs:
 
       - name: Notify Ports Repo
         if: env.build == 'true' && inputs.force-build != true
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.PORTS_REPO_PAT }}
           repository: JeodC/RHH-Ports
