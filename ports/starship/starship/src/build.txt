@@ -1,4 +1,4 @@
-set -e
+set -euo pipefail
 
 # Build SDL2 2.32 from source so the other libraries we build below link
 # against a modern SDL2 at build time. We do NOT ship libSDL2-2.0.so.0 —
@@ -8,16 +8,6 @@ git clone https://github.com/libsdl-org/SDL.git
 cd SDL
 git checkout release-2.32.0 # was 2.26.2
 mkdir -p build-starship && cd build-starship
-cmake ..
-make -j$(nproc)
-make install
-cd ../..
-
-# not needed?
-git clone https://github.com/libsdl-org/SDL_net.git
-cd SDL_net
-git checkout release-2.2.0
-mkdir build-starship && cd build-starship
 cmake ..
 make -j$(nproc)
 make install
@@ -50,30 +40,29 @@ cd ../..
 # make install
 # cd ../..
 
-git clone https://github.com/leethomason/tinyxml2.git
-cd tinyxml2
-git checkout 57ec94127bda7979282315b7d4b0059eeb6f3b5d
-git checkout .
-mkdir build-starship && cd build-starship
-cmake -DBUILD_SHARED_LIBS=ON ..
-make -j$(nproc)
-make install
-cd ../..
-
-git clone https://github.com/microsoft/GSL.git
-cd GSL
-git checkout 2828399820ef4928cc89b65605dca5dc68efca6e
-mkdir build-starship && cd build-starship
-cmake -DBUILD_SHARED_LIBS=ON ..
-make -j$(nproc)
-make install
-cd ../..
-
+# nlohmann-json is header-only; tinyxml2 is fetched via Starship's CMake
+# FetchContent. Both are baked into the binary, no clone needed here.
+#
+# spdlog is required for static linking — Starship #includes <spdlog/spdlog.h>
+# and links libspdlog.a from /usr/local. The Ubuntu apt package is too old, so
+# we build a current version from source. (Static-only: no .so is shipped.)
 git clone https://github.com/gabime/spdlog.git
 cd spdlog
 git checkout 3335c380a08c5e0f5117a66622df6afdb3d74959
 mkdir build-starship && cd build-starship
 cmake ..
+make -j$(nproc)
+make install
+cd ../..
+
+# GSL (Microsoft guidelines support library) is header-only but Starship's
+# CMake explicitly find_package's it, so the install puts headers in the right
+# place for that to succeed.
+git clone https://github.com/microsoft/GSL.git
+cd GSL
+git checkout 2828399820ef4928cc89b65605dca5dc68efca6e
+mkdir build-starship && cd build-starship
+cmake -DBUILD_SHARED_LIBS=ON ..
 make -j$(nproc)
 make install
 cd ../..
@@ -116,17 +105,22 @@ cmake --build . -j$(nproc)
 # follow symlinks so each destination is a real file with the right name;
 # wildcards + `find -delete` can produce broken symlinks that silently fall
 # through to the system library. libSDL2 is NOT shipped (device provides it).
-# Starship only needs zip, tinyxml2, and z — no vorbis/ogg (unlike SoH).
+# tinyxml2/spdlog/nlohmann-json/GSL are static-linked, not runtime deps.
+# vorbis/ogg are dynamic deps Starship inherits via libSDL2_mixer/etc., shipped
+# defensively for handhelds that don't have them in /usr/lib.
 mkdir libs
-cp -L /usr/lib/aarch64-linux-gnu/libz.so.1 ./libs/libz.so.1
-cp -L /usr/local/lib/libzip.so.5 ./libs/libzip.so.5
-cp -L /usr/local/lib/libtinyxml2.so.11 ./libs/libtinyxml2.so.11
+cp -L /usr/lib/aarch64-linux-gnu/libz.so.1         ./libs/libz.so.1
+cp -L /usr/lib/aarch64-linux-gnu/libogg.so.0       ./libs/libogg.so.0
+cp -L /usr/lib/aarch64-linux-gnu/libvorbis.so.0    ./libs/libvorbis.so.0
+cp -L /usr/lib/aarch64-linux-gnu/libvorbisenc.so.2 ./libs/libvorbisenc.so.2
+cp -L /usr/lib/aarch64-linux-gnu/libvorbisfile.so.3 ./libs/libvorbisfile.so.3
+cp -L /usr/local/lib/libzip.so.5                   ./libs/libzip.so.5
 
 # Verify: every staged lib is in NEEDED, every expected NEEDED lib is staged.
 needed=$(readelf -d Starship | awk -F'[][]' '/NEEDED/ {print $2}')
 echo "Binary NEEDED:"; echo "$needed"
 echo "Staged:"; ls libs/
-for lib in libz.so.1 libzip.so.5 libtinyxml2.so.11; do
+for lib in libz.so.1 libogg.so.0 libvorbis.so.0 libvorbisenc.so.2 libvorbisfile.so.3 libzip.so.5; do
     if ! echo "$needed" | grep -qx "$lib"; then
         echo "ERROR: staged $lib but binary does not NEED it"; exit 1
     fi
