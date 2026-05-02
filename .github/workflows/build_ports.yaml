@@ -26,7 +26,7 @@ jobs:
     with:
       port-name: "Ship of Harkinian"
       short-name: SoH
-      port-dir: soh
+      port: soh
       build-type: release
       upstream-repo: "HarbourMasters/Shipwright"
       force-build: ${{ github.event.inputs.force-port == 'soh' }}
@@ -38,7 +38,7 @@ jobs:
     with:
       port-name: "2Ship2Harkinian"
       short-name: SoH2
-      port-dir: soh2
+      port: soh2
       build-type: release
       upstream-repo: "HarbourMasters/2ship2harkinian"
       force-build: ${{ github.event.inputs.force-port == 'soh2' }}
@@ -50,7 +50,7 @@ jobs:
     with:
       port-name: "Starship"
       short-name: Starship
-      port-dir: starship
+      port: starship
       build-type: release
       upstream-repo: "HarbourMasters/Starship"
       force-build: ${{ github.event.inputs.force-port == 'starship' }}
@@ -62,7 +62,7 @@ jobs:
     with:
       port-name: "SpaghettiKart"
       short-name: SpaghettiKart
-      port-dir: spaghettikart
+      port: spaghettikart
       build-type: release
       upstream-repo: "HarbourMasters/SpaghettiKart"
       force-build: ${{ github.event.inputs.force-port == 'spaghettikart' }}
@@ -74,7 +74,7 @@ jobs:
     with:
       port-name: "Ghostship"
       short-name: Ghostship
-      port-dir: sm64-ghostship
+      port: sm64-ghostship
       build-type: release
       upstream-repo: "HarbourMasters/Ghostship"
       force-build: ${{ github.event.inputs.force-port == 'ghostship' }}
@@ -86,7 +86,7 @@ jobs:
     with:
       port-name: "Paperboat"
       short-name: Paperboat
-      port-dir: paperboat
+      port: paperboat
       build-type: release
       upstream-repo: "HarbourMasters/PaperBoat"
       force-build: ${{ github.event.inputs.force-port == 'paperboat' }}

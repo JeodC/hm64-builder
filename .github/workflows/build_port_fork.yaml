@@ -16,8 +16,8 @@ on:
         description: "Short name"
         required: true
         type: string
-      port-dir:
-        description: "Port folder"
+      port:
+        description: "Port identifier (matches builds/<port>.txt and zip top-level dir)"
         required: true
         type: string
       build-type:
@@ -47,7 +47,7 @@ jobs:
         with:
           sparse-checkout: |
             tools
-            ports/${{ inputs.port-dir }}
+            builds
           sparse-checkout-cone-mode: false
 
       - name: Build port
@@ -55,14 +55,13 @@ jobs:
           FORCE_HEAD: "false"
           REPO_URL: ${{ inputs.repo-url }}
           REF: ${{ inputs.ref }}
+          # Forks default to no anchor (handheld test builds, etc.). Recipes
+          # that don't honor BUILD_ANCHOR ignore this.
+          BUILD_ANCHOR: "0"
+          BUILD_TYPE: ${{ inputs.build-type }}
         run: |
-          ./tools/build_port.sh ports/${{ inputs.port-dir }}/${{ inputs.port-dir }}
-
-      - name: Create zip file
-        run: |
-          cd ports/${{ inputs.port-dir }}
-          rm -rf ${{ inputs.port-dir }}/*.part.[0-9]*
-          zip -r ${{ inputs.port-dir }}-fork.zip *.sh ${{ inputs.port-dir }}
+          ./tools/build_port.sh ${{ inputs.port }}
+          rm -rf ${{ inputs.port }}/*.part.[0-9]*
 
       - name: Sanitize ref for artifact name
         id: sanitize
@@ -74,5 +73,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.short-name }}-${{ steps.sanitize.outputs.safe_ref }}
-          path: ports/${{ inputs.port-dir }}/${{ inputs.port-dir }}-fork.zip
+          path: ${{ inputs.port }}
           retention-days: ${{ inputs.retention-days }}

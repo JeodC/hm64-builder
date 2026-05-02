@@ -4,15 +4,15 @@ on:
   workflow_call:
     inputs:
       port-name:
-        description: "Port name"
+        description: "Port name (human-readable)"
         required: true
         type: string
       short-name:
-        description: "Short name"
+        description: "Short name (used in release tags)"
         required: true
         type: string
-      port-dir:
-        description: "Port folder"
+      port:
+        description: "Port identifier (matches builds/<port>.txt and zip top-level dir)"
         required: true
         type: string
       build-type:
@@ -31,6 +31,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   build:
@@ -41,8 +42,8 @@ jobs:
           sparse-checkout: |
             releases
             tools
+            builds
             SOURCE_SETUP.txt
-            ports/${{ inputs.port-dir }}
           sparse-checkout-cone-mode: false
 
       - name: Fetch latest upstream release tag
@@ -113,17 +114,15 @@ jobs:
         if: env.build == 'true'
         env:
           FORCE_HEAD: ${{ inputs.force-build }}
+          BUILD_TYPE: ${{ inputs.build-type }}
         run: |
-          ./tools/build_port.sh ports/${{ inputs.port-dir }}/${{ inputs.port-dir }}
+          ./tools/build_port.sh ${{ inputs.port }}
 
       - name: Create zip file
         if: env.build == 'true'
         run: |
-          cd ports/${{ inputs.port-dir }}
-          rm -rf ${{ inputs.port-dir }}/*.part.[0-9]*
-          zip -r ${{ inputs.port-dir }}.zip *.sh ${{ inputs.port-dir }}
-          echo ${{ inputs.port-dir }}.zip >> .gitignore
-          echo ".gitignore" >> .gitignore
+          rm -rf ${{ inputs.port }}/*.part.[0-9]*
+          zip -r ${{ inputs.port }}.zip ${{ inputs.port }}
 
       - name: Set release tag
         if: env.build == 'true'
@@ -140,7 +139,7 @@ jobs:
         with:
           tag: ${{ env.RELEASE_TAG }}
           body: "${{ env.UPSTREAM_BODY }}"
-          artifacts: ports/${{ inputs.port-dir }}/*.zip
+          artifacts: ${{ inputs.port }}.zip
           prerelease: ${{ inputs.force-build }}
           makeLatest: false
           allowUpdates: true
@@ -156,5 +155,107 @@ jobs:
           client-payload: >
             {
               "version": "${{ env.UPSTREAM_VERSION }}",
-              "zip_url": "https://github.com/JeodC/hm64-builder/releases/download/${{ env.RELEASE_TAG }}/${{ inputs.port-dir }}.zip"
+              "zip_url": "https://github.com/JeodC/hm64-builder/releases/download/${{ env.RELEASE_TAG }}/${{ inputs.port }}.zip"
+            }
+
+      # On scheduled (cron) failures, open or comment on a tracking issue so that
+      # silent breakage gets noticed. Skipped for workflow_dispatch — manual runs
+      # are interactive and any failure is already visible to the operator.
+      # Body includes the failed step name and the tail of its log so you can
+      # triage from the issue without clicking through to the run.
+      - name: Open or update failure issue
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        env:
+          PORT_NAME: ${{ inputs.port-name }}
+          SHORT_NAME: ${{ inputs.short-name }}
+          UPSTREAM_VERSION: ${{ env.UPSTREAM_VERSION }}
+        with:
+          script: |
+            const TAIL_LINES = 30;
+            const portName = process.env.PORT_NAME;
+            const shortName = process.env.SHORT_NAME;
+            const upstreamVersion = process.env.UPSTREAM_VERSION || 'unknown';
+            const titlePrefix = `[auto] ${shortName} build failure`;
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            // Find the failed job for this run. There should be exactly one
+            // because each port build is a separate top-level job; we filter by
+            // matrix-style name match in case the runner returns multiple.
+            const { data: jobsData } = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+              per_page: 100,
+            });
+            const failedJob = jobsData.jobs.find(j =>
+              j.status === 'completed' && j.conclusion === 'failure'
+            );
+
+            // Identify the first failed step (typically the actual cause).
+            let failedStepName = '(unknown)';
+            if (failedJob) {
+              const failedStep = (failedJob.steps || []).find(s => s.conclusion === 'failure');
+              if (failedStep) failedStepName = failedStep.name;
+            }
+
+            // Pull the job log. The API returns a redirect to a plain-text log
+            // (not a zip — that's the run-level endpoint). github-script's Octokit
+            // follows redirects automatically and gives us the body as ArrayBuffer.
+            let logTail = '(log unavailable)';
+            if (failedJob) {
+              try {
+                const logResp = await github.rest.actions.downloadJobLogsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  job_id: failedJob.id,
+                });
+                const text = Buffer.from(logResp.data).toString('utf8');
+                const allLines = text.split(/\r?\n/);
+                // Trim trailing blank lines that bloat the tail.
+                while (allLines.length && allLines[allLines.length - 1] === '') allLines.pop();
+                logTail = allLines.slice(-TAIL_LINES).join('\n');
+              } catch (e) {
+                core.warning(`Failed to fetch job log: ${e.message}`);
+              }
+            }
+
+            const body = [
+              `Scheduled build of **${portName}** failed at step **${failedStepName}**.`,
+              ``,
+              `- Upstream version: \`${upstreamVersion}\``,
+              `- Workflow run: ${runUrl}`,
+              ``,
+              `Last ${TAIL_LINES} lines of the failed job log:`,
+              '```',
+              logTail,
+              '```',
+            ].join('\n');
+
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'auto-build-failure',
+              per_page: 100,
+            });
+            const existing = openIssues.find(i => i.title.startsWith(titlePrefix));
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+              core.info(`Commented on existing issue #${existing.number}`);
+            } else {
+              const { data: created } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `${titlePrefix} (${upstreamVersion})`,
+                body,
+                labels: ['auto-build-failure'],
+              });
+              core.info(`Created new issue #${created.number}`);
             }

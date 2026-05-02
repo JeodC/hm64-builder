@@ -1,0 +1,44 @@
+set -e
+source /root/tools/lib_build.sh
+
+# Project clone — submodules used recursively.
+project_clone https://github.com/HarbourMasters/SpaghettiKart.git --recursive
+
+# SpaghettiKart needs SDL2 with explicit GLES-only video drivers.
+build_sdl2 \
+    -DSDL_VIDEO_OPENGL=OFF \
+    -DSDL_VIDEO_OPENGL_GLX=OFF \
+    -DSDL_VIDEO_OPENGL_EGL=ON \
+    -DSDL_VIDEO_OPENGL_ES2=ON \
+    -DSDL_VIDEO_VULKAN=OFF \
+    -DSDL_OPENGLES=ON \
+    -DSDL_STATIC=OFF \
+    -DSDL_SHARED=ON
+
+build_libzip
+build_json
+build_tinyxml2
+build_gsl
+build_fmt
+build_spdlog -DSPDLOG_FMT_EXTERNAL=ON
+
+project_configure_and_build GenerateO2R \
+    -DCMAKE_C_COMPILER=clang-18 \
+    -DCMAKE_CXX_COMPILER=clang++-18 \
+    -DUSE_OPENGLES=1 \
+    -DBUILD_CROWD_CONTROL=0 \
+    -DCMAKE_BUILD_TYPE=${BUILD_TYPE:-Release} \
+    -DCMAKE_C_FLAGS="-fno-strict-aliasing -funsigned-char" \
+    -DCMAKE_CXX_FLAGS="-fno-strict-aliasing -funsigned-char" \
+    -DCMAKE_EXE_LINKER_FLAGS="-ldl -pthread -Wl,--no-relax"
+
+# libSDL2 / audio driver libs (libasound, libjack, libpulse) are NOT shipped:
+# devices provide them. Binary doesn't NEED libbz2.
+stage_libs Spaghettify \
+    libogg.so.0 \
+    libvorbis.so.0 \
+    libvorbisenc.so.2 \
+    libvorbisfile.so.3 \
+    libz.so.1 \
+    libzip.so.5 \
+    libtinyxml2.so.10

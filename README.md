@@ -1,5 +1,5 @@
 # HM64 Autobuilder
-This is a simple repository to automatically obtain new release tags (twice per day) and if there is a new release, build it for linux aarch64. The repository then notifies a separate repository of a new release, and *that* repository takes the release zips and updates the ports.
+This is a simple repository to automatically obtain new release tags (twice per day) for HarbourMasters ports and, if there is a new release, build it for linux aarch64. The repository then notifies a separate repository of a new release, and *that* repository takes the release zips and updates the ports.
 
 The releases contain binaries and required files for the following:
 
@@ -11,5 +11,3 @@ The releases contain binaries and required files for the following:
 - PaperBoat (not released yet)
 
 Releases from *this* repository use the same descriptions as the upstream releases.
-
-Thanks to beniamino for the actions build which inspired this repository.

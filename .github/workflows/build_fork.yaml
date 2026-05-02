@@ -43,7 +43,7 @@ jobs:
     with:
       port-name: "Ship of Harkinian"
       short-name: SoH
-      port-dir: soh
+      port: soh
       build-type: ${{ github.event.inputs.build-type }}
       repo-url: ${{ github.event.inputs.repo-url }}
       ref: ${{ github.event.inputs.ref }}
@@ -55,7 +55,7 @@ jobs:
     with:
       port-name: "2Ship2Harkinian"
       short-name: SoH2
-      port-dir: soh2
+      port: soh2
       build-type: ${{ github.event.inputs.build-type }}
       repo-url: ${{ github.event.inputs.repo-url }}
       ref: ${{ github.event.inputs.ref }}
@@ -67,7 +67,7 @@ jobs:
     with:
       port-name: "Starship"
       short-name: Starship
-      port-dir: starship
+      port: starship
       build-type: ${{ github.event.inputs.build-type }}
       repo-url: ${{ github.event.inputs.repo-url }}
       ref: ${{ github.event.inputs.ref }}
@@ -79,7 +79,7 @@ jobs:
     with:
       port-name: "SpaghettiKart"
       short-name: SpaghettiKart
-      port-dir: spaghettikart
+      port: spaghettikart
       build-type: ${{ github.event.inputs.build-type }}
       repo-url: ${{ github.event.inputs.repo-url }}
       ref: ${{ github.event.inputs.ref }}
@@ -91,7 +91,7 @@ jobs:
     with:
       port-name: "Ghostship"
       short-name: Ghostship
-      port-dir: sm64-ghostship
+      port: sm64-ghostship
       build-type: ${{ github.event.inputs.build-type }}
       repo-url: ${{ github.event.inputs.repo-url }}
       ref: ${{ github.event.inputs.ref }}
@@ -103,7 +103,7 @@ jobs:
     with:
       port-name: "Paperboat"
       short-name: Paperboat
-      port-dir: paperboat
+      port: paperboat
       build-type: ${{ github.event.inputs.build-type }}
       repo-url: ${{ github.event.inputs.repo-url }}
       ref: ${{ github.event.inputs.ref }}

@@ -1,0 +1,22 @@
+set -e
+source /root/tools/lib_build.sh
+
+project_clone https://github.com/HarbourMasters/paperboat.git --recursive
+
+build_sdl2
+build_libzip
+build_json
+build_tinyxml2
+build_gsl
+build_spdlog
+
+project_configure_and_build GeneratePortO2R \
+    -DUSE_OPENGLES=1 \
+    -DCMAKE_BUILD_TYPE=${BUILD_TYPE:-Release} \
+    -DCMAKE_CXX_FLAGS=-ldl
+
+# Mirror sm64-ghostship's minimal NEEDED set; verify step will reveal if Paperboat
+# needs more.
+stage_libs Paperboat \
+    libzip.so.5 \
+    libtinyxml2.so.10
