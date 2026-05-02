@@ -1,0 +1,109 @@
+name: Build Fork
+
+# Manually build a port from an arbitrary fork URL + ref (branch/tag/SHA).
+# Result is uploaded as a workflow artifact (no GitHub release).
+
+on:
+  workflow_dispatch:
+    inputs:
+      port:
+        description: "Port to build"
+        type: choice
+        required: true
+        options:
+          - soh
+          - soh2
+          - starship
+          - spaghettikart
+          - ghostship
+          - paperboat
+      repo-url:
+        description: "Fork URL (e.g. https://github.com/JeodC/Shipwright.git)"
+        type: string
+        required: true
+      ref:
+        description: "Branch, tag, or commit SHA"
+        type: string
+        required: true
+      build-type:
+        description: "Build type"
+        type: choice
+        required: false
+        default: Debug
+        options:
+          - Debug
+          - RelWithDebInfo
+          - Release
+
+jobs:
+  build-soh:
+    if: github.event.inputs.port == 'soh'
+    name: Build Ship of Harkinian (fork)
+    uses: ./.github/workflows/build_port_fork.yaml
+    with:
+      port-name: "Ship of Harkinian"
+      short-name: SoH
+      port-dir: soh
+      build-type: ${{ github.event.inputs.build-type }}
+      repo-url: ${{ github.event.inputs.repo-url }}
+      ref: ${{ github.event.inputs.ref }}
+
+  build-soh2:
+    if: github.event.inputs.port == 'soh2'
+    name: Build 2Ship2Harkinian (fork)
+    uses: ./.github/workflows/build_port_fork.yaml
+    with:
+      port-name: "2Ship2Harkinian"
+      short-name: SoH2
+      port-dir: soh2
+      build-type: ${{ github.event.inputs.build-type }}
+      repo-url: ${{ github.event.inputs.repo-url }}
+      ref: ${{ github.event.inputs.ref }}
+
+  build-starship:
+    if: github.event.inputs.port == 'starship'
+    name: Build Starship (fork)
+    uses: ./.github/workflows/build_port_fork.yaml
+    with:
+      port-name: "Starship"
+      short-name: Starship
+      port-dir: starship
+      build-type: ${{ github.event.inputs.build-type }}
+      repo-url: ${{ github.event.inputs.repo-url }}
+      ref: ${{ github.event.inputs.ref }}
+
+  build-spaghettikart:
+    if: github.event.inputs.port == 'spaghettikart'
+    name: Build SpaghettiKart (fork)
+    uses: ./.github/workflows/build_port_fork.yaml
+    with:
+      port-name: "SpaghettiKart"
+      short-name: SpaghettiKart
+      port-dir: spaghettikart
+      build-type: ${{ github.event.inputs.build-type }}
+      repo-url: ${{ github.event.inputs.repo-url }}
+      ref: ${{ github.event.inputs.ref }}
+
+  build-ghostship:
+    if: github.event.inputs.port == 'ghostship'
+    name: Build Ghostship (fork)
+    uses: ./.github/workflows/build_port_fork.yaml
+    with:
+      port-name: "Ghostship"
+      short-name: Ghostship
+      port-dir: sm64-ghostship
+      build-type: ${{ github.event.inputs.build-type }}
+      repo-url: ${{ github.event.inputs.repo-url }}
+      ref: ${{ github.event.inputs.ref }}
+
+  build-paperboat:
+    if: github.event.inputs.port == 'paperboat'
+    name: Build Paperboat (fork)
+    uses: ./.github/workflows/build_port_fork.yaml
+    with:
+      port-name: "Paperboat"
+      short-name: Paperboat
+      port-dir: paperboat
+      build-type: ${{ github.event.inputs.build-type }}
+      repo-url: ${{ github.event.inputs.repo-url }}
+      ref: ${{ github.event.inputs.ref }}

@@ -102,12 +102,15 @@ cd ../..
 
 ## SpaghettiKart ##
 
-git clone https://github.com/HarbourMasters/SpaghettiKart.git
+git clone "${REPO_URL:-https://github.com/HarbourMasters/SpaghettiKart.git}" SpaghettiKart
 cd SpaghettiKart
 
 # Checkout latest tag, or branch HEAD if FORCE_HEAD is set
 git fetch --tags
-if [[ "${FORCE_HEAD:-false}" == "true" ]]; then
+if [[ -n "${REF}" ]]; then
+  echo "REF=$REF — building from explicit ref"
+  git checkout "$REF"
+elif [[ "${FORCE_HEAD:-false}" == "true" ]]; then
   echo "FORCE_HEAD=true — building from branch HEAD (nightly)"
 else
   git checkout $(git describe --tags `git rev-list --tags --max-count=1`)

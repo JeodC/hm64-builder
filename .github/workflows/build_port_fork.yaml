@@ -1,0 +1,78 @@
+name: Build port (fork)
+
+# Sibling of build_port.yaml. Builds a port from an arbitrary fork + ref
+# (branch, tag, or SHA). Skips upstream-version comparison and release
+# publishing — the result is uploaded as a workflow artifact instead.
+# Use this for testing fork branches without touching the production pipeline.
+
+on:
+  workflow_call:
+    inputs:
+      port-name:
+        description: "Port name"
+        required: true
+        type: string
+      short-name:
+        description: "Short name"
+        required: true
+        type: string
+      port-dir:
+        description: "Port folder"
+        required: true
+        type: string
+      build-type:
+        description: "Build type (e.g. Debug, RelWithDebInfo)"
+        required: false
+        type: string
+        default: "Debug"
+      repo-url:
+        description: "Git URL of the fork to build"
+        required: true
+        type: string
+      ref:
+        description: "Branch, tag, or commit SHA to check out"
+        required: true
+        type: string
+      retention-days:
+        description: "Artifact retention (days)"
+        required: false
+        type: number
+        default: 14
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            tools
+            ports/${{ inputs.port-dir }}
+          sparse-checkout-cone-mode: false
+
+      - name: Build port
+        env:
+          FORCE_HEAD: "false"
+          REPO_URL: ${{ inputs.repo-url }}
+          REF: ${{ inputs.ref }}
+        run: |
+          ./tools/build_port.sh ports/${{ inputs.port-dir }}/${{ inputs.port-dir }}
+
+      - name: Create zip file
+        run: |
+          cd ports/${{ inputs.port-dir }}
+          rm -rf ${{ inputs.port-dir }}/*.part.[0-9]*
+          zip -r ${{ inputs.port-dir }}-fork.zip *.sh ${{ inputs.port-dir }}
+
+      - name: Sanitize ref for artifact name
+        id: sanitize
+        run: |
+          # Artifact names can't contain '/' or other special chars; flatten the ref
+          safe_ref=$(echo "${{ inputs.ref }}" | tr '/:' '__' | head -c 60)
+          echo "safe_ref=$safe_ref" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.short-name }}-${{ steps.sanitize.outputs.safe_ref }}
+          path: ports/${{ inputs.port-dir }}/${{ inputs.port-dir }}-fork.zip
+          retention-days: ${{ inputs.retention-days }}
